@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registro - CazaLibros</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="auth-page">
+  <div class="auth-wrapper">
+    <div class="auth-card">
+      <img src="img/imagenRegistro.png" alt="Registro CazaLibros" class="auth-illustration" />
+
+      <form id="registroForm" class="auth-form">
+        <label for="nombre">Nombre</label>
+        <input type="text" id="nombre" placeholder="Ingresa tu nombre" required />
+
+        <label for="apellido">Apellido</label>
+        <input type="text" id="apellido" placeholder="Ingresa tu apellido" required />
+
+        <label for="correo">Email</label>
+        <input type="email" id="correo" placeholder="Ingresa tu mail" required />
+
+        <label for="password">Contraseña</label>
+        <input type="password" id="password" placeholder="Ingresa tu contraseña" required />
+
+        <label for="confirmPassword">Confirma tu contraseña</label>
+        <input type="password" id="confirmPassword" placeholder="Confirma tu contraseña" required />
+
+        <label>Rol de Usuario</label>
+        <div class="radio-group">
+          <label><input type="radio" name="rol" value="alumno" required /> Estudiante</label>
+          <label><input type="radio" name="rol" value="docente" required /> Docente</label>
+        </div>
+
+        <!-- CAMPOS EXTRA DOCENTE -->
+        <div id="camposDocente" class="hidden">
+          <label for="asignatura">Asignatura</label>
+          <input type="text" id="asignatura" placeholder="Ej: Lenguaje y Comunicación" />
+
+          <label for="curso">Curso</label>
+          <input type="text" id="curso" placeholder="Ej: 3° Básico A" />
+
+          <label class="checkbox-label">
+            <input type="checkbox" id="jefe" />
+            Profesor jefe
+          </label>
+        </div>
+
+        <div class="btn-group">
+          <button type="submit">Registrar</button>
+          <button type="button" class="btn-back" onclick="window.location.href='login.html'">
+            Volver
+          </button>
+        </div>
+      </form>
+
+      <p id="mensaje" class="auth-message"></p>
+    </div>
+  </div>
+
+  <script src="js/registro.js"></script>
+</body>
+</html>

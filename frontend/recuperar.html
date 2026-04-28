@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recuperar Contraseña - CazaLibros</title>
+  <link rel="stylesheet" href="css/auth.css" />
+</head>
+<body class="auth-page">
+  <div class="auth-wrapper">
+    <div class="auth-card recover-card">
+      <div class="mini-logo">📘 CazaLibros</div>
+
+      <h1>¿Olvidaste tu contraseña?</h1>
+      <p class="recover-text">
+        Ingrese su dirección de correo electrónico para recibir un enlace de recuperación de contraseña.
+      </p>
+
+      <form id="recuperarForm" class="auth-form">
+        <input
+          type="email"
+          id="correo"
+          placeholder="Introduce tu dirección de correo electrónico"
+          required
+        />
+        <button type="submit">Enviar enlace de recuperación</button>
+        <button type="button" class="btn-back" onclick="window.location.href='login.html'">
+            Volver
+          </button>
+      </form>
+
+      <p id="mensaje" class="auth-message"></p>
+    </div>
+  </div>
+
+  <script src="js/recuperar.js"></script>
+</body>
+</html>

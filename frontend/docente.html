@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel del Docente - CazaLibros</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="admin-layout">
+    <aside class="admin-sidebar">
+      <div class="admin-logo">
+        <span class="logo-icon"></span>
+        <span class="logo-text">CazaLibros</span>
+      </div>
+
+      <nav class="admin-menu">
+        <a href="javascript:void(0)" class="menu-link active" onclick="mostrarSeccionDocente('inicio', this)">Inicio</a>
+        <a href="javascript:void(0)" class="menu-link" onclick="mostrarSeccionDocente('lecturas', this)">Lecturas</a>
+        <a href="javascript:void(0)" class="menu-link" onclick="mostrarSeccionDocente('cuestionarios', this)">Cuestionarios</a>
+        <a href="javascript:void(0)" class="menu-link" onclick="mostrarSeccionDocente('resultados', this)">Resultados</a>
+        <a href="javascript:void(0)" class="menu-link" onclick="mostrarSeccionDocente('estadisticas', this)">Estadísticas</a>
+        <a href="javascript:void(0)" onclick="logout()">Cerrar sesión</a>
+      </nav>
+    </aside>
+
+    <main class="admin-main">
+      <header class="admin-topbar">
+        <div>
+          <h1>Panel del Docente</h1>
+          <p>Bienvenido, <span id="nombreDocente">Docente</span></p>
+          <p id="cursoDocenteInfo">Curso asignado: sin información</p>
+        </div>
+        <div class="admin-avatar">👤</div>
+      </header>
+
+      <!-- INICIO -->
+      <section id="docente-seccion-inicio" class="admin-section-visible">
+        <section class="admin-cards">
+          <div class="admin-card light">
+            <h3>Curso a cargo</h3>
+            <p id="cursoDocenteNombre">Sin curso</p>
+          </div>
+
+          <div class="admin-card soft">
+            <h3>Alumnos registrados</h3>
+            <p id="cantidadAlumnos">0 de 0</p>
+          </div>
+
+          <div class="admin-card primary">
+            <h3>Resultados registrados</h3>
+            <p id="cantidadResultados">0</p>
+          </div>
+        </section>
+
+        <section class="admin-panel">
+          <button type="button" onclick="toggleFormulario()" class="btn-accion">
+            ➕ Agregar alumno al curso
+          </button>
+
+          <div id="formAgregarAlumno" class="hidden">
+            <div class="form-admin">
+              <input type="text" id="nuevoAlumnoNombre" placeholder="Nombre" />
+              <input type="text" id="nuevoAlumnoApellido" placeholder="Apellido" />
+              <input type="email" id="nuevoAlumnoCorreo" placeholder="Correo" />
+
+              <div class="btn-group-admin">
+                <button type="button" onclick="registrarAlumnoDesdeDocente()">Agregar alumno</button>
+                <button type="button" class="btn-secondary" onclick="limpiarFormularioAlumnoDocente()">Limpiar</button>
+              </div>
+
+              <p id="mensajeAlumnoDocente"></p>
+            </div>
+          </div>
+        </section>
+
+        <section class="admin-panel">
+          <h2>Alumnos registrados del curso</h2>
+          <p id="resumenCursoDocente">Aún no hay información del curso.</p>
+
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>N°</th>
+                  <th>Alumno</th>
+                  <th>Correo</th>
+                  <th>Progreso</th>
+                  <th>Barra</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tablaAlumnosCursoBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="admin-panel">
+          <h2>Alumnos pendientes por registrarse</h2>
+
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>N°</th>
+                  <th>Alumno</th>
+                  <th>Correo</th>
+                  <th>Estado</th>
+                  <th>Fecha</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tablaPendientesBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="formEditarAlumnoContainer" class="admin-panel hidden">
+          <h2>Editar alumno registrado</h2>
+
+          <div class="form-admin">
+            <input type="hidden" id="editarAlumnoId" />
+            <input type="text" id="editarAlumnoNombre" placeholder="Nombre" />
+            <input type="text" id="editarAlumnoApellido" placeholder="Apellido" />
+            <input type="email" id="editarAlumnoCorreo" placeholder="Correo" />
+
+            <div class="btn-group-admin">
+              <button type="button" onclick="guardarEdicionAlumno()">Guardar cambios</button>
+              <button type="button" class="btn-secondary" onclick="cerrarEdicionAlumno()">Cancelar</button>
+            </div>
+
+            <p id="mensajeEditarAlumno"></p>
+          </div>
+        </section>
+
+        <section id="formEditarPendienteContainer" class="admin-panel hidden">
+          <h2>Editar alumno pendiente</h2>
+
+          <div class="form-admin">
+            <input type="hidden" id="editarPendienteId" />
+            <input type="text" id="editarPendienteNombre" placeholder="Nombre" />
+            <input type="text" id="editarPendienteApellido" placeholder="Apellido" />
+            <input type="email" id="editarPendienteCorreo" placeholder="Correo" />
+
+            <div class="btn-group-admin">
+              <button type="button" onclick="guardarEdicionPendiente()">Guardar cambios</button>
+              <button type="button" class="btn-secondary" onclick="cerrarEdicionPendiente()">Cancelar</button>
+            </div>
+
+            <p id="mensajeEditarPendiente"></p>
+          </div>
+        </section>
+
+        <section class="admin-panel">
+          <h2>Resultados del Curso</h2>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Alumno</th>
+                  <th>Lectura</th>
+                  <th>Puntaje</th>
+                  <th>Estado</th>
+                  <th>Fecha</th>
+                </tr>
+              </thead>
+              <tbody id="tablaResultadosBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <!-- LECTURAS -->
+      <section id="docente-seccion-lecturas" class="admin-section-hidden">
+        <section class="admin-panel">
+          <h2>Crear nueva lectura</h2>
+
+          <select id="selectCursoLectura">
+            <option value="">Seleccionar curso</option>
+          </select>
+
+          <div class="form-admin">
+            <input type="text" id="tituloLectura" placeholder="Título" />
+            <input type="text" id="autorLectura" placeholder="Autor" />
+            <input type="text" id="nivelLectura" placeholder="Nivel de dificultad" />
+            <input type="text" id="categoriaLectura" placeholder="Categoría" />
+            <textarea id="textoLectura" placeholder="Historia" rows="8"></textarea>
+
+            <div class="btn-group-admin">
+              <button type="button" onclick="guardarLectura()">Guardar</button>
+              <button type="button" class="btn-secondary" onclick="limpiarFormularioLectura()">Cancelar</button>
+            </div>
+
+            <p id="mensajeLecturaDocente"></p>
+          </div>
+        </section>
+
+        <section class="admin-panel">
+          <h2>Lecturas creadas</h2>
+
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Título</th>
+                  <th>Autor</th>
+                  <th>Nivel</th>
+                  <th>Categoría</th>
+                  <th>Asignaciones</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tablaLecturasBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <!-- CUESTIONARIOS -->
+      <section id="docente-seccion-cuestionarios" class="admin-section-hidden">
+        <section class="admin-panel">
+          <h2>Crear un nuevo cuestionario</h2>
+
+          <div class="form-admin">
+            <input type="hidden" id="cuestionarioIdActual" />
+
+            <select id="lecturaRelacionada">
+              <option value="">Seleccionar lectura relacionada</option>
+            </select>
+
+            <input type="text" id="tituloCuestionario" placeholder="Título del cuestionario" />
+
+            <select id="tipoPregunta">
+              <option value="opcion_multiple">Opción múltiple</option>
+              <option value="verdadero_falso">Verdadero/Falso</option>
+            </select>
+
+            <textarea id="textoPregunta" placeholder="Texto de la pregunta" rows="4"></textarea>
+
+            <div class="opciones-cuestionario">
+              <div class="opcion-item">
+                <input type="radio" name="opcionCorrecta" id="correcta1" value="1" checked />
+                <input type="text" id="respuesta1" placeholder="Respuesta 1" />
+              </div>
+
+              <div class="opcion-item">
+                <input type="radio" name="opcionCorrecta" id="correcta2" value="2" />
+                <input type="text" id="respuesta2" placeholder="Respuesta 2" />
+              </div>
+
+              <div class="opcion-item">
+                <input type="radio" name="opcionCorrecta" id="correcta3" value="3" />
+                <input type="text" id="respuesta3" placeholder="Respuesta 3" />
+              </div>
+
+              <div class="opcion-item">
+                <input type="radio" name="opcionCorrecta" id="correcta4" value="4" />
+                <input type="text" id="respuesta4" placeholder="Respuesta 4" />
+              </div>
+            </div>
+
+            <div class="btn-group-admin">
+              <button type="button" onclick="guardarPregunta()">Guardar pregunta</button>
+              <button type="button" class="btn-secondary" onclick="limpiarFormularioPregunta()">Limpiar</button>
+            </div>
+
+            <p id="mensajeCuestionarioDocente"></p>
+          </div>
+        </section>
+
+        <section class="admin-panel">
+          <h2>Cuestionarios creados</h2>
+
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Título</th>
+                  <th>Lectura</th>
+                  <th>Curso</th>
+                  <th>Preguntas</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tablaCuestionariosBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="admin-panel">
+          <h2>Preguntas del cuestionario</h2>
+
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>N°</th>
+                  <th>Pregunta</th>
+                  <th>Tipo</th>
+                  <th>Opciones</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tablaPreguntasCuestionarioBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <!-- RESULTADOS -->
+      <section id="docente-seccion-resultados" class="admin-section-hidden">
+        <section class="admin-panel">
+          <h2>Resultados de Estudiantes</h2>
+
+          <div class="admin-actions">
+            <input type="text" id="filtroCurso" placeholder="Curso" readonly />
+            <input type="text" id="filtroEstudiante" placeholder="Buscar estudiante" />
+            <input type="date" id="filtroFechaResultado" />
+            <button type="button" onclick="exportarReporteDocente()">Exportar reporte</button>
+          </div>
+
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Alumno</th>
+                  <th>Lectura</th>
+                  <th>Puntuación</th>
+                  <th>Estado</th>
+                  <th>Fecha</th>
+                </tr>
+              </thead>
+              <tbody id="tablaResultadosResumenBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <!-- ESTADÍSTICAS -->
+      <section id="docente-seccion-estadisticas" class="admin-section-hidden">
+        <section class="admin-panel">
+          <h2>Análisis de Lectura</h2>
+
+          <div class="report-grid">
+            <div class="admin-panel report-card">
+              <h3>Desempeño de Lectura</h3>
+              <div class="chart-box small-chart">
+                <canvas id="graficoDocenteBarras"></canvas>
+              </div>
+            </div>
+
+            <div class="admin-panel report-card">
+              <h3>Tasas de Compleción</h3>
+              <div class="chart-box small-chart">
+                <canvas id="graficoDocentePie"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="admin-panel report-card">
+            <h3>Tendencias Semanales</h3>
+            <div class="chart-box small-chart">
+              <canvas id="graficoDocenteLineas"></canvas>
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <script src="js/docente.js"></script>
+</body>
+</html>

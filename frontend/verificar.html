@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Verificar cuenta</title>
+  <link rel="stylesheet" href="css/auth.css" />
+</head>
+<body>
+  <div class="auth-wrapper">
+    <div class="auth-card">
+      <h1>Verificación de cuenta</h1>
+      <p id="mensaje">Verificando tu cuenta...</p>
+    </div>
+  </div>
+
+  <script>
+    async function verificarCuenta() {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get("token");
+      const mensaje = document.getElementById("mensaje");
+
+      if (!token) {
+        mensaje.textContent = "Token inválido";
+        return;
+      }
+
+      try {
+        const response = await fetch(`http://localhost:3000/api/auth/verify/${token}`);
+        const data = await response.json();
+
+        if (!response.ok) {
+          mensaje.textContent = data.message || "No se pudo verificar la cuenta";
+          return;
+        }
+
+        mensaje.style.color = "green";
+        mensaje.textContent = "Cuenta verificada correctamente. Ya puedes iniciar sesión.";
+      } catch (error) {
+        console.error(error);
+        mensaje.textContent = "Error de conexión con el servidor";
+      }
+    }
+
+    verificarCuenta();
+  </script>
+</body>
+</html>

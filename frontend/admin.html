@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel del Administrador - CazaLibros</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="admin-layout">
+    <aside class="admin-sidebar">
+      <div class="admin-logo">
+        <span class="logo-icon"></span>
+        <span>CazaLibros Admin</span>
+      </div>
+
+      <nav class="admin-menu">
+        <a href="#" class="menu-link active" onclick="mostrarSeccion('panel', this)">Panel</a>
+        <a href="#" class="menu-link" onclick="mostrarSeccion('usuarios', this)">Usuarios</a>
+        <a href="#" class="menu-link" onclick="mostrarSeccion('auditoria', this)">Auditoría</a>
+        <a href="#" class="menu-link" onclick="mostrarSeccion('reportes', this)">Reportes</a>
+        <a href="#" class="menu-link" onclick="mostrarSeccion('seguridad', this)">Base de datos y seguridad</a>
+        <a href="#" onclick="logout()">Cerrar sesión</a>
+      </nav>
+    </aside>
+
+    <main class="admin-main">
+      <header class="admin-topbar">
+        <div>
+          <h1>Panel del Administrador</h1>
+          <p>Bienvenido, <span id="nombreAdmin">Administrador</span></p>
+        </div>
+        <div class="admin-avatar">👤</div>
+      </header>
+
+      <!-- PANEL -->
+      <section id="seccion-panel" class="admin-section-visible">
+        <section class="admin-cards">
+          <div class="admin-card light">
+            <h3>Total de Usuarios</h3>
+            <p id="cantidadUsuarios">0</p>
+          </div>
+
+          <div class="admin-card soft">
+            <h3>Usuarios Activos</h3>
+            <p id="usuariosActivos">0</p>
+          </div>
+
+          <div class="admin-card primary">
+            <h3>Nuevos registros</h3>
+            <p id="nuevosRegistros">0</p>
+          </div>
+        </section>
+
+        <section class="admin-panel">
+          <h2>Alertas de Sistema</h2>
+          <div id="listaAlertas" class="alert-list"></div>
+        </section>
+      </section>
+
+      <!-- USUARIOS -->
+      <section id="seccion-usuarios" class="admin-section-hidden">
+        <section class="admin-panel">
+          <h2>Gestión de Usuarios</h2>
+
+          <div class="admin-actions">
+            <input type="text" id="buscadorUsuarios" placeholder="Buscar por nombre, apellido, correo o rol" />
+            <button type="button" onclick="abrirFormularioNuevoUsuario()">Agregar usuario</button>
+          </div>
+
+          <div id="formUsuarioContainer" class="form-admin hidden">
+            <h3 id="tituloFormularioUsuario">Nuevo usuario</h3>
+
+            <input type="hidden" id="usuarioId" />
+            <input type="text" id="nombreUsuario" placeholder="Nombre" />
+            <input type="text" id="apellidoUsuario" placeholder="Apellido" />
+            <input type="email" id="correoUsuario" placeholder="Correo" />
+            <input type="password" id="passwordUsuario" placeholder="Contraseña (solo para crear)" />
+
+            <select id="rolUsuario">
+              <option value="alumno">Alumno</option>
+              <option value="docente">Docente</option>
+              <option value="admin">Admin</option>
+            </select>
+
+            <!-- CAMPOS DOCENTE -->
+            <div id="camposDocente" class="hidden">
+              <input type="text" id="asignaturaUsuario" placeholder="Asignatura (Ej: Lenguaje y Comunicación)" />
+              <input type="text" id="cursoUsuario" placeholder="Curso (Ej: 3° Básico A)" />
+
+              <label style="display:flex; align-items:center; gap:8px; margin-top:6px; font-weight:600; color:#223f70;">
+                <input type="checkbox" id="jefeUsuario" style="width:auto;" />
+                Profesor jefe
+              </label>
+            </div>
+
+            <div class="btn-group-admin">
+              <button type="button" onclick="guardarUsuario()">Guardar</button>
+              <button type="button" class="btn-secondary" onclick="cerrarFormularioUsuario()">Cancelar</button>
+            </div>
+          </div>
+
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Nombre</th>
+                  <th>Correo</th>
+                  <th>Rol</th>
+                  <th>Asignatura</th>
+                  <th>Curso</th>
+                  <th>Jefe</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tablaUsuariosBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <!-- AUDITORIA -->
+      <section id="seccion-auditoria" class="admin-section-hidden">
+        <section class="admin-panel">
+          <h2>Registro de Sistema</h2>
+
+          <div class="admin-actions">
+            <input type="text" id="filtroAuditoriaUsuario" placeholder="Filtrar por usuario" />
+            <input type="text" id="filtroAuditoriaAccion" placeholder="Filtrar por acción" />
+            <input type="date" id="filtroAuditoriaFecha" />
+            <button type="button" onclick="exportarAuditoria()">Exportar</button>
+          </div>
+
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Usuario</th>
+                  <th>Acción</th>
+                  <th>Fecha</th>
+                  <th>Hora</th>
+                  <th>Descripción</th>
+                </tr>
+              </thead>
+              <tbody id="tablaAuditoriaBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <!-- REPORTES -->
+      <section id="seccion-reportes" class="admin-section-hidden">
+        <section class="admin-panel">
+          <h2>Panel de Reportes</h2>
+
+          <section class="admin-cards report-cards">
+            <div class="admin-card light">
+              <h3>Usuarios Activos</h3>
+              <p id="reporteUsuariosActivos">0</p>
+            </div>
+
+            <div class="admin-card light">
+              <h3>Lecturas Completadas</h3>
+              <p id="reporteLecturasCompletadas">0</p>
+            </div>
+
+            <div class="admin-card light">
+              <h3>Cuestionarios Realizados</h3>
+              <p id="reporteCuestionarios">0</p>
+            </div>
+
+            <div class="admin-card light">
+              <h3>Rendimiento General</h3>
+              <p id="reporteRendimiento">0%</p>
+            </div>
+          </section>
+
+          <div class="report-grid">
+            <div class="admin-panel report-card">
+              <h3>Eventos del sistema</h3>
+              <div class="chart-box small-chart">
+                <canvas id="graficoActividad"></canvas>
+              </div>
+            </div>
+
+            <div class="admin-panel report-card">
+              <h3>Usuarios por rol</h3>
+              <div class="chart-box small-chart">
+                <canvas id="graficoRoles"></canvas>
+              </div>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <!-- SEGURIDAD -->
+      <section id="seccion-seguridad" class="admin-section-hidden">
+        <section class="admin-panel">
+          <h2>Gestión de base de datos y seguridad</h2>
+
+          <section class="admin-cards report-cards">
+            <div class="admin-card light">
+              <h3>Respaldo de Base de Datos</h3>
+              <p style="font-size:14px; font-weight:400;">
+                Descarga un respaldo del sistema en formato JSON.
+              </p>
+              <button type="button" onclick="respaldarSistema()">Iniciar Respaldo</button>
+              <small id="estadoRespaldo"></small>
+            </div>
+
+            <div class="admin-card light">
+              <h3>Restauración de Base de Datos</h3>
+              <p style="font-size:14px; font-weight:400;">
+                Restauración desde archivo de respaldo.
+              </p>
+              <button type="button" disabled>Próximamente</button>
+              <small>Se implementará más adelante</small>
+            </div>
+
+            <div class="admin-card light">
+              <h3>Verificaciones de Seguridad</h3>
+              <p style="font-size:14px; font-weight:400;">
+                Verifica integridad del sistema.
+              </p>
+              <button type="button" onclick="verificarSeguridad()">Iniciar Verificación</button>
+              <small id="estadoSeguridad"></small>
+            </div>
+          </section>
+
+          <div id="detalleSeguridad" class="admin-panel hidden"></div>
+        </section>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="js/admin.js"></script>
+</body>
+</html>
