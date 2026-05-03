@@ -38,16 +38,28 @@ const obtenerUsuarios = async (req, res) => {
   try {
     const resultado = await pool.query(
       `SELECT 
-        id,
-        nombre,
-        apellido,
-        correo,
-        rol,
-        asignatura,
-        curso,
-        es_profesor_jefe
-       FROM usuarios
-       ORDER BY id ASC`
+        u.id,
+        u.nombre,
+        u.apellido,
+        u.correo,
+        u.rol,
+        u.asignatura,
+        u.curso,
+        u.es_profesor_jefe,
+        c.id AS curso_id,
+        c.nombre AS curso_matriculado,
+        c.nivel AS curso_nivel,
+        c.anio AS curso_anio
+       FROM usuarios u
+       LEFT JOIN matriculas m ON m.alumno_id = u.id
+       LEFT JOIN cursos c ON c.id = m.curso_id
+       ORDER BY 
+        CASE 
+          WHEN c.nombre IS NULL AND u.rol = 'alumno' THEN 1
+          ELSE 0
+        END,
+        c.nombre ASC,
+        u.id ASC`
     );
 
     res.status(200).json(resultado.rows);
@@ -95,16 +107,17 @@ const obtenerAlertasSistema = async (req, res) => {
 };
 
 const crearUsuarioAdmin = async (req, res) => {
-  const {
-    nombre,
-    apellido,
-    correo,
-    password,
-    rol,
-    asignatura,
-    curso,
-    es_profesor_jefe
-  } = req.body;
+      const {
+      nombre,
+      apellido,
+      correo,
+      password,
+      rol,
+      asignatura,
+      curso,
+      curso_id,
+      es_profesor_jefe
+    } = req.body;
 
   try {
     const rolesValidos = ["alumno", "docente", "admin"];
@@ -166,6 +179,15 @@ const crearUsuarioAdmin = async (req, res) => {
       es_profesor_jefe
     );
 
+        if (rol === "alumno" && curso_id) {
+      await pool.query(
+        `INSERT INTO matriculas (alumno_id, curso_id, estado)
+        VALUES ($1, $2, 'activo')
+        ON CONFLICT (alumno_id, curso_id) DO NOTHING`,
+        [nuevoUsuario.rows[0].id, curso_id]
+      );
+    }
+
     await pool.query(
       `INSERT INTO eventos_log (usuario_id, tipo_evento, detalle)
        VALUES ($1, $2, $3)`,
@@ -188,13 +210,14 @@ const crearUsuarioAdmin = async (req, res) => {
 
 const actualizarUsuarioAdmin = async (req, res) => {
   const { id } = req.params;
-  const {
+    const {
     nombre,
     apellido,
     correo,
     rol,
     asignatura,
     curso,
+    curso_id,
     es_profesor_jefe
   } = req.body;
 
@@ -244,6 +267,22 @@ const actualizarUsuarioAdmin = async (req, res) => {
     }
 
     await sincronizarCursoDocente(id, rol, curso, es_profesor_jefe);
+
+    if (rol === "alumno") {
+  await pool.query(
+    `DELETE FROM matriculas
+     WHERE alumno_id = $1`,
+    [id]
+  );
+
+  if (curso_id) {
+    await pool.query(
+      `INSERT INTO matriculas (alumno_id, curso_id, estado)
+       VALUES ($1, $2, 'activo')`,
+      [id, curso_id]
+    );
+  }
+}
 
     await pool.query(
       `INSERT INTO eventos_log (usuario_id, tipo_evento, detalle)

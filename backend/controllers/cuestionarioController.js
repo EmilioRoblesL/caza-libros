@@ -48,7 +48,6 @@ const obtenerCuestionariosDocente = async (req, res) => {
           c.titulo,
           c.estado,
           c.creado_en,
-          c.actualizado_en,
           l.titulo AS lectura_titulo,
           cu.nombre AS curso_nombre,
           cu.nivel AS curso_nivel,
@@ -59,7 +58,18 @@ const obtenerCuestionariosDocente = async (req, res) => {
        LEFT JOIN cursos cu ON c.curso_id = cu.id
        LEFT JOIN preguntas p ON p.cuestionario_id = c.id
        WHERE c.docente_id = $1
-       GROUP BY c.id, l.titulo, cu.nombre, cu.nivel, cu.anio
+       GROUP BY 
+          c.id,
+          c.docente_id,
+          c.lectura_id,
+          c.curso_id,
+          c.titulo,
+          c.estado,
+          c.creado_en,
+          l.titulo,
+          cu.nombre,
+          cu.nivel,
+          cu.anio
        ORDER BY c.creado_en DESC`,
       [docenteId]
     );
@@ -68,7 +78,8 @@ const obtenerCuestionariosDocente = async (req, res) => {
   } catch (error) {
     console.error("Error al obtener cuestionarios:", error);
     return res.status(500).json({
-      message: "Error al obtener cuestionarios"
+      message: "Error al obtener cuestionarios",
+      error: error.message
     });
   }
 };

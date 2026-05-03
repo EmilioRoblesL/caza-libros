@@ -304,18 +304,25 @@ function renderizarTablaAlumnosCurso(alumnos) {
       <td>${progreso}%</td>
       <td>
         <div class="docente-progress-wrap">
-          <div 
-            class="docente-progress-bar"
+          <div class="docente-progress-bar"
             style="width:${progreso}%; background:${obtenerColorProgreso(progreso)};">
           </div>
         </div>
       </td>
-      <td>${escaparHTML(a.estado_lectura)}</td>
+      <td>${escaparHTML(a.estado_lectura || "Sin iniciar")}</td>
       <td>
-        <button type="button" class="btn-table" onclick="editarAlumno(${a.id}, ${JSON.stringify(a.nombre)}, ${JSON.stringify(a.apellido)}, ${JSON.stringify(a.correo)})">Editar</button>
-        <button type="button" class="btn-table btn-danger" onclick="eliminarAlumno(${a.id})">Eliminar</button>
+        <button type="button" class="btn-table btn-editar">Editar</button>
+        <button type="button" class="btn-table btn-danger btn-eliminar">Eliminar</button>
       </td>
     `;
+
+    tr.querySelector(".btn-editar").addEventListener("click", () => {
+      editarAlumno(a.id, a.nombre || "", a.apellido || "", a.correo || "");
+    });
+
+    tr.querySelector(".btn-eliminar").addEventListener("click", () => {
+      eliminarAlumno(a.id);
+    });
 
     tbody.appendChild(tr);
   });
@@ -346,10 +353,18 @@ function renderizarTablaPendientes(pendientes) {
       <td>${escaparHTML(p.estado || "pendiente")}</td>
       <td>${formatearFecha(p.creado_en)}</td>
       <td>
-        <button type="button" class="btn-table" onclick="editarPendiente(${p.id}, ${JSON.stringify(p.nombre)}, ${JSON.stringify(p.apellido)}, ${JSON.stringify(p.correo)})">Editar</button>
-        <button type="button" class="btn-table btn-danger" onclick="eliminarPendiente(${p.id})">Eliminar</button>
+        <button type="button" class="btn-table btn-editar">Editar</button>
+        <button type="button" class="btn-table btn-danger btn-eliminar">Eliminar</button>
       </td>
     `;
+
+    tr.querySelector(".btn-editar").addEventListener("click", () => {
+      editarPendiente(p.id, p.nombre || "", p.apellido || "", p.correo || "");
+    });
+
+    tr.querySelector(".btn-eliminar").addEventListener("click", () => {
+      eliminarPendiente(p.id);
+    });
 
     tbody.appendChild(tr);
   });
@@ -824,6 +839,7 @@ async function guardarLectura() {
   const nivel = document.getElementById("nivelLectura")?.value.trim();
   const contenido = document.getElementById("textoLectura")?.value.trim();
   const mensaje = document.getElementById("mensajeLecturaDocente");
+  const categoria = document.getElementById("categoriaLectura")?.value.trim();
 
   if (!titulo || !nivel || !contenido) {
     if (mensaje) {
@@ -859,7 +875,9 @@ async function guardarLectura() {
           titulo,
           autor,
           nivel_dificultad: nivel,
-          contenido
+          categoria,
+          contenido,
+          curso_id
         })
       });
 
@@ -883,6 +901,7 @@ async function guardarLectura() {
           titulo,
           autor,
           nivel_dificultad: nivel,
+          categoria,
           contenido,
           curso_id
         })
@@ -954,6 +973,7 @@ async function cargarLecturasDocente() {
 
     lecturasDocenteGlobal = Array.isArray(data) ? data : [];
     renderizarTablaLecturas(lecturasDocenteGlobal);
+    llenarSelectLecturasCuestionario(); 
   } catch (error) {
     console.error("Error al cargar lecturas:", error);
     tbody.innerHTML = `<tr><td colspan="6">No se pudieron cargar las lecturas</td></tr>`;
@@ -977,7 +997,7 @@ function renderizarTablaLecturas(lecturas) {
       <td>${escaparHTML(l.titulo)}</td>
       <td>${escaparHTML(l.autor)}</td>
       <td>${escaparHTML(l.nivel_dificultad)}</td>
-      <td>No definida</td>
+      <td>${escaparHTML(l.categoria || "No definida")}</td>
       <td>${escaparHTML(l.total_asignaciones)}</td>
       <td>
         <button type="button" class="btn-table" onclick="editarLectura(${l.id})">Editar</button>
@@ -1002,7 +1022,7 @@ function editarLectura(id) {
   if (titulo) titulo.value = lectura.titulo || "";
   if (autor) autor.value = lectura.autor || "";
   if (nivel) nivel.value = lectura.nivel_dificultad || "";
-  if (categoria) categoria.value = "";
+  if (categoria) categoria.value = lectura.categoria || "";
   if (texto) texto.value = lectura.contenido || "";
 
   lecturaEditandoId = lectura.id;
@@ -1063,6 +1083,407 @@ function limpiarFormularioPregunta() {
 }
 
 /* =========================
+   CUESTIONARIOS - SELECT LECTURAS
+========================= */
+function llenarSelectLecturasCuestionario() {
+  const select = document.getElementById("lecturaRelacionada");
+  if (!select) return;
+
+  select.innerHTML = `<option value="">Seleccionar lectura relacionada</option>`;
+
+  lecturasDocenteGlobal.forEach((l) => {
+    const option = document.createElement("option");
+    option.value = l.id;
+    option.dataset.cursoId = l.curso_id || "";
+    option.textContent = `${l.titulo}${l.curso_nombre ? " - " + l.curso_nombre : ""}`;
+    select.appendChild(option);
+  });
+}
+
+/* =========================
+   CUESTIONARIOS - LISTAR
+========================= */
+async function cargarCuestionariosDocente() {
+  const tbody = document.getElementById("tablaCuestionariosBody");
+  if (!tbody) return;
+
+  try {
+    const res = await fetch(`${API_CUESTIONARIOS}/docente/${usuario.id}`);
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || "No se pudieron cargar los cuestionarios");
+    }
+
+    cuestionariosGlobal = Array.isArray(data) ? data : [];
+    renderizarTablaCuestionarios(cuestionariosGlobal);
+  } catch (error) {
+    console.error("Error al cargar cuestionarios:", error);
+    tbody.innerHTML = `<tr><td colspan="6">No se pudieron cargar los cuestionarios</td></tr>`;
+  }
+}
+
+function renderizarTablaCuestionarios(cuestionarios) {
+  const tbody = document.getElementById("tablaCuestionariosBody");
+  if (!tbody) return;
+
+  tbody.innerHTML = "";
+
+  if (!Array.isArray(cuestionarios) || cuestionarios.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6">No hay cuestionarios creados</td></tr>`;
+    return;
+  }
+
+  cuestionarios.forEach((c) => {
+    const cursoTexto = `${c.curso_nombre || ""} ${c.curso_nivel || ""} ${c.curso_anio || ""}`.trim();
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${escaparHTML(c.titulo)}</td>
+      <td>${escaparHTML(c.lectura_titulo || "Sin lectura")}</td>
+      <td>${escaparHTML(cursoTexto || "Sin curso")}</td>
+      <td>${Number(c.total_preguntas || 0)}</td>
+      <td>${escaparHTML(c.estado || "borrador")}</td>
+      <td>
+        <button type="button" class="btn-table btn-ver">Ver</button>
+        <button type="button" class="btn-table btn-enviar">Enviar</button>
+        <button type="button" class="btn-table btn-secondary btn-desactivar">Quitar envío</button>
+        <button type="button" class="btn-table btn-danger btn-eliminar">Eliminar</button>
+      </td>
+    `;
+
+    tr.querySelector(".btn-ver").addEventListener("click", () => {
+      verPreguntasCuestionario(c.id);
+    });
+
+    tr.querySelector(".btn-enviar").addEventListener("click", () => {
+      enviarCuestionario(c.id);
+    });
+
+    tr.querySelector(".btn-desactivar").addEventListener("click", () => {
+      desactivarCuestionario(c.id);
+    });
+
+    tr.querySelector(".btn-eliminar").addEventListener("click", () => {
+      eliminarCuestionario(c.id);
+    });
+
+    tbody.appendChild(tr);
+  });
+}
+
+/* =========================
+   CUESTIONARIOS - CREAR Y GUARDAR PREGUNTA
+========================= */
+async function guardarPregunta() {
+  const lecturaSelect = document.getElementById("lecturaRelacionada");
+  const lectura_id = lecturaSelect?.value;
+  const curso_id = lecturaSelect?.selectedOptions?.[0]?.dataset?.cursoId;
+  const titulo = document.getElementById("tituloCuestionario")?.value.trim();
+  const tipo = document.getElementById("tipoPregunta")?.value;
+  const enunciado = document.getElementById("textoPregunta")?.value.trim();
+  const mensaje = document.getElementById("mensajeCuestionarioDocente");
+
+  const respuestas = [
+    document.getElementById("respuesta1")?.value.trim(),
+    document.getElementById("respuesta2")?.value.trim(),
+    document.getElementById("respuesta3")?.value.trim(),
+    document.getElementById("respuesta4")?.value.trim()
+  ];
+
+  const correcta = Number(document.querySelector('input[name="opcionCorrecta"]:checked')?.value || 1);
+
+  if (!lectura_id || !titulo || !tipo || !enunciado || respuestas.some((r) => !r)) {
+    if (mensaje) {
+      mensaje.textContent = "Debes completar lectura, título, pregunta y las 4 respuestas.";
+      mensaje.style.color = "red";
+    }
+    return;
+  }
+
+  if (!curso_id) {
+    if (mensaje) {
+      mensaje.textContent = "La lectura seleccionada no tiene curso asociado. Revisa la asignación de la lectura.";
+      mensaje.style.color = "red";
+    }
+    return;
+  }
+
+  try {
+    let cuestionarioId = document.getElementById("cuestionarioIdActual")?.value;
+
+    if (!cuestionarioId) {
+      const resCuestionario = await fetch(`${API_CUESTIONARIOS}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          docente_id: usuario.id,
+          lectura_id,
+          titulo,
+          curso_id
+        })
+      });
+
+      const dataCuestionario = await resCuestionario.json();
+
+      if (!resCuestionario.ok) {
+        throw new Error(dataCuestionario.message || "No se pudo crear el cuestionario");
+      }
+
+      cuestionarioId = dataCuestionario.cuestionario.id;
+      document.getElementById("cuestionarioIdActual").value = cuestionarioId;
+    }
+
+    const opciones = respuestas.map((texto, index) => ({
+      texto,
+      es_correcta: index + 1 === correcta
+    }));
+
+    const resPregunta = await fetch(`${API_CUESTIONARIOS}/${cuestionarioId}/preguntas`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        enunciado,
+        tipo,
+        lectura_id,
+        opciones
+      })
+    });
+
+    const dataPregunta = await resPregunta.json();
+
+    if (!resPregunta.ok) {
+      throw new Error(dataPregunta.message || "No se pudo guardar la pregunta");
+    }
+
+    if (mensaje) {
+      mensaje.textContent = "Pregunta guardada correctamente.";
+      mensaje.style.color = "green";
+    }
+
+    limpiarCamposPreguntaManteniendoCuestionario();
+    await cargarCuestionariosDocente();
+    await verPreguntasCuestionario(cuestionarioId);
+  } catch (error) {
+    console.error("Error al guardar pregunta:", error);
+    if (mensaje) {
+      mensaje.textContent = error.message || "Error al guardar la pregunta";
+      mensaje.style.color = "red";
+    }
+  }
+}
+
+function limpiarCamposPreguntaManteniendoCuestionario() {
+  const texto = document.getElementById("textoPregunta");
+  const r1 = document.getElementById("respuesta1");
+  const r2 = document.getElementById("respuesta2");
+  const r3 = document.getElementById("respuesta3");
+  const r4 = document.getElementById("respuesta4");
+  const correcta1 = document.getElementById("correcta1");
+
+  if (texto) texto.value = "";
+  if (r1) r1.value = "";
+  if (r2) r2.value = "";
+  if (r3) r3.value = "";
+  if (r4) r4.value = "";
+  if (correcta1) correcta1.checked = true;
+}
+
+function limpiarFormularioPregunta() {
+  const cuestionarioId = document.getElementById("cuestionarioIdActual");
+  const lectura = document.getElementById("lecturaRelacionada");
+  const titulo = document.getElementById("tituloCuestionario");
+  const tipo = document.getElementById("tipoPregunta");
+  const mensaje = document.getElementById("mensajeCuestionarioDocente");
+
+  if (cuestionarioId) cuestionarioId.value = "";
+  if (lectura) lectura.value = "";
+  if (titulo) titulo.value = "";
+  if (tipo) tipo.value = "opcion_multiple";
+  if (mensaje) {
+    mensaje.textContent = "";
+    mensaje.style.color = "";
+  }
+
+  limpiarCamposPreguntaManteniendoCuestionario();
+
+  const tbody = document.getElementById("tablaPreguntasCuestionarioBody");
+  if (tbody) {
+    tbody.innerHTML = "";
+  }
+}
+
+/* =========================
+   CUESTIONARIOS - VER PREGUNTAS
+========================= */
+async function verPreguntasCuestionario(cuestionarioId) {
+  const tbody = document.getElementById("tablaPreguntasCuestionarioBody");
+  if (!tbody) return;
+
+  try {
+    const res = await fetch(`${API_CUESTIONARIOS}/${cuestionarioId}`);
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || "No se pudo cargar el cuestionario");
+    }
+
+    preguntasCuestionarioGlobal = Array.isArray(data.preguntas) ? data.preguntas : [];
+
+    const cuestionario = data.cuestionario;
+    document.getElementById("cuestionarioIdActual").value = cuestionario.id;
+    document.getElementById("tituloCuestionario").value = cuestionario.titulo || "";
+    document.getElementById("lecturaRelacionada").value = cuestionario.lectura_id || "";
+
+    renderizarPreguntasCuestionario(preguntasCuestionarioGlobal);
+  } catch (error) {
+    console.error("Error al ver preguntas:", error);
+    tbody.innerHTML = `<tr><td colspan="5">No se pudieron cargar las preguntas</td></tr>`;
+  }
+}
+
+function renderizarPreguntasCuestionario(preguntas) {
+  const tbody = document.getElementById("tablaPreguntasCuestionarioBody");
+  if (!tbody) return;
+
+  tbody.innerHTML = "";
+
+  if (!Array.isArray(preguntas) || preguntas.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5">Este cuestionario aún no tiene preguntas</td></tr>`;
+    return;
+  }
+
+  preguntas.forEach((p, index) => {
+    const opcionesTexto = (p.opciones || [])
+      .map((o) => `${o.es_correcta ? "✅" : "•"} ${o.texto}`)
+      .join("<br>");
+
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${index + 1}</td>
+      <td>${escaparHTML(p.enunciado)}</td>
+      <td>${escaparHTML(p.tipo)}</td>
+      <td>${opcionesTexto}</td>
+      <td>
+        <button type="button" class="btn-table btn-danger btn-eliminar-pregunta">Eliminar</button>
+      </td>
+    `;
+
+    tr.querySelector(".btn-eliminar-pregunta").addEventListener("click", () => {
+      eliminarPregunta(p.id, p.cuestionario_id);
+    });
+
+    tbody.appendChild(tr);
+  });
+}
+
+/* =========================
+   CUESTIONARIOS - ELIMINAR / ENVIAR
+========================= */
+async function eliminarPregunta(preguntaId, cuestionarioId) {
+  const confirmar = confirm("¿Eliminar esta pregunta?");
+  if (!confirmar) return;
+
+  try {
+    const res = await fetch(`${API_CUESTIONARIOS}/preguntas/${preguntaId}`, {
+      method: "DELETE"
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || "No se pudo eliminar la pregunta");
+    }
+
+    await verPreguntasCuestionario(cuestionarioId);
+    await cargarCuestionariosDocente();
+  } catch (error) {
+    console.error("Error al eliminar pregunta:", error);
+    alert(error.message);
+  }
+}
+
+async function eliminarCuestionario(cuestionarioId) {
+  const confirmar = confirm("¿Eliminar este cuestionario completo?");
+  if (!confirmar) return;
+
+  try {
+    const res = await fetch(`${API_CUESTIONARIOS}/${cuestionarioId}`, {
+      method: "DELETE"
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || "No se pudo eliminar el cuestionario");
+    }
+
+    limpiarFormularioPregunta();
+    await cargarCuestionariosDocente();
+  } catch (error) {
+    console.error("Error al eliminar cuestionario:", error);
+    alert(error.message);
+  }
+}
+
+async function enviarCuestionario(cuestionarioId) {
+  const confirmar = confirm("¿Enviar este cuestionario al curso?");
+  if (!confirmar) return;
+
+  try {
+    const res = await fetch(`${API_CUESTIONARIOS}/${cuestionarioId}/enviar`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        enviado_por: usuario.id
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || "No se pudo enviar el cuestionario");
+    }
+
+    alert("Cuestionario enviado correctamente.");
+    await cargarCuestionariosDocente();
+  } catch (error) {
+    console.error("Error al enviar cuestionario:", error);
+    alert(error.message);
+  }
+}
+
+async function desactivarCuestionario(cuestionarioId) {
+  const confirmar = confirm("¿Quitar el envío de este cuestionario?");
+  if (!confirmar) return;
+
+  try {
+    const res = await fetch(`${API_CUESTIONARIOS}/${cuestionarioId}/desactivar`, {
+      method: "PUT"
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || "No se pudo desactivar el cuestionario");
+    }
+
+    alert("Envío desactivado correctamente.");
+    await cargarCuestionariosDocente();
+  } catch (error) {
+    console.error("Error al desactivar cuestionario:", error);
+    alert(error.message);
+  }
+}
+
+/* =========================
    LOGOUT
 ========================= */
 function logout() {
@@ -1077,6 +1498,7 @@ document.addEventListener("DOMContentLoaded", () => {
   configurarFiltrosResultados();
   cargarPanelDocente();
   cargarCursosLectura();
-  cargarLecturasDocente();
+  cargarLecturasDocente(); // AQUÍ se llenará el select después
+  cargarCuestionariosDocente();
   mostrarSeccionDocente("inicio", document.querySelector(".menu-link.active"));
 });

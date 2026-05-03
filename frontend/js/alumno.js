@@ -76,12 +76,8 @@ async function cargarLecturasAsignadas() {
       : [];
 
     if (cantidad) cantidad.textContent = lecturas.length;
-
-    if (!lecturas.length) {
+        if (!lecturas.length) {
       lista.innerHTML = "<li>No tienes lecturas asignadas</li>";
-      if (cursoInfo) {
-        cursoInfo.textContent = "Curso: sin información";
-      }
       return;
     }
 
@@ -476,14 +472,177 @@ async function responderEvaluacion() {
 }
 
 /* =========================
+   cargar cuestionarios para responder
+========================= */
+
+async function cargarCuestionariosAlumno() {
+  try {
+    const res = await fetch(`http://localhost:3000/api/evaluaciones/alumno/${usuario.id}/cuestionarios`);
+    const cuestionarios = await res.json();
+
+    const lista = document.getElementById("listaCuestionariosAlumno");
+    lista.innerHTML = "";
+
+    if (!cuestionarios.length) {
+      lista.innerHTML = "<li>No tienes evaluaciones asignadas</li>";
+      return;
+    }
+
+    cuestionarios.forEach(c => {
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <strong>${c.cuestionario_titulo}</strong><br>
+        Lectura: ${c.lectura_titulo}<br>
+        <button onclick="abrirCuestionario(${c.cuestionario_id})">
+          Responder cuestionario
+        </button>
+      `;
+      lista.appendChild(li);
+    });
+
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+/* =========================
+abrir cuestionario para responder
+========================= */
+
+async function abrirCuestionario(id) {
+  try {
+    const res = await fetch(`http://localhost:3000/api/cuestionarios/${id}`);
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || "No se pudo cargar el cuestionario");
+    }
+
+    const cuestionario = data.cuestionario;
+    const preguntas = data.preguntas || [];
+
+    const contenedor = document.getElementById("contenedorCuestionarioAlumno");
+
+    contenedor.innerHTML = `
+      <h3>${cuestionario.titulo}</h3>
+      <form id="formResponder"></form>
+      <button type="button" onclick="enviarRespuestas(${cuestionario.id}, ${cuestionario.lectura_id})">
+        Enviar respuestas
+      </button>
+    `;
+
+    const form = document.getElementById("formResponder");
+
+    preguntas.forEach((p) => {
+      const div = document.createElement("div");
+      div.style.marginBottom = "20px";
+
+      div.innerHTML = `
+        <p><strong>${p.enunciado}</strong></p>
+        ${(p.opciones || []).map(op => `
+          <label>
+            <input type="radio" name="pregunta_${p.id}" value="${op.id}">
+            ${op.texto}
+          </label><br>
+        `).join("")}
+      `;
+
+      form.appendChild(div);
+    });
+
+  } catch (error) {
+    console.error("Error al abrir cuestionario:", error);
+    alert("Error al abrir cuestionario");
+  }
+}
+
+/* =========================
+   cargar respuestas y enviar al backend
+========================= */
+async function enviarRespuestas(cuestionarioId, lecturaId) {
+  try {
+    const inputs = document.querySelectorAll("#formResponder input:checked");
+
+    if (!inputs.length) {
+      alert("Debes responder al menos una pregunta");
+      return;
+    }
+
+    const respuestas = [];
+
+    inputs.forEach(i => {
+      const pregunta_id = parseInt(i.name.split("_")[1]);
+      const opcion_id = parseInt(i.value);
+
+      respuestas.push({ pregunta_id, opcion_id });
+    });
+
+    const res = await fetch("http://localhost:3000/api/evaluaciones/responder", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        alumno_id: usuario.id,
+        lectura_id: lecturaId,
+        respuestas
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message);
+    }
+
+    alert(`Puntaje: ${data.puntaje} - ${data.aprobado ? "Aprobado" : "Reprobado"}`);
+
+    cargarResultados();
+    cargarPuntos();
+
+  } catch (error) {
+    console.error(error);
+    alert("Error al enviar respuestas");
+  }
+}
+
+/* =========================
+    PERFIL ALUMNO
+========================= */
+
+async function cargarPerfilAlumno() {
+  try {
+    const res = await fetch(`http://localhost:3000/api/alumnos/${usuario.id}/perfil`);
+    const data = await res.json();
+
+    const cursoInfo = document.getElementById("cursoAlumnoInfo");
+    if (!cursoInfo) return;
+
+    const cursoTexto = data.curso
+      ? `${data.curso} - ${data.nivel} (${data.anio})`
+      : "Sin curso";
+
+    const docenteTexto = data.docente_nombre
+      ? `${data.docente_nombre} ${data.docente_apellido}`
+      : "Sin profesor jefe";
+
+    cursoInfo.textContent = `Curso: ${cursoTexto} | Profesor jefe: ${docenteTexto}`;
+  } catch (error) {
+    console.error("Error perfil alumno:", error);
+  }
+}
+
+/* =========================
    INIT
 ========================= */
 document.addEventListener("DOMContentLoaded", () => {
   cargarBienvenidaAlumno();
   cargarLecturasAsignadas();
+  cargarCuestionariosAlumno();
   cargarResultados();
   cargarPuntos();
   cargarProgresoAlumno();
+  cargarPerfilAlumno();
 });
 
 /* =========================

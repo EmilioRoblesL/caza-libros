@@ -140,12 +140,13 @@
           <ul id="listaProgresoAlumno" class="lista-alumno"></ul>
         </section>
       </section>
-
       <!-- RESULTADOS -->
       <section id="alumno-seccion-resultados" class="admin-section-hidden">
         <section class="admin-panel">
-          <h2>Evaluación</h2>
-          <button type="button" onclick="responderEvaluacion()">Responder evaluación</button>
+          <h2>Evaluaciones asignadas</h2>
+          <button type="button" onclick="cargarCuestionariosAlumno()">Actualizar evaluaciones</button>
+          <ul id="listaCuestionariosAlumno" class="lista-alumno"></ul>
+          <div id="contenedorCuestionarioAlumno"></div>
         </section>
 
         <section class="admin-panel">

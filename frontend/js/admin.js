@@ -1,4 +1,5 @@
 const usuario = JSON.parse(localStorage.getItem("usuario"));
+
 let usuariosGlobal = [];
 let auditoriaGlobal = [];
 let graficoActividad = null;
@@ -55,6 +56,8 @@ async function cargarUsuarios() {
 
     usuariosGlobal = Array.isArray(data) ? data : [];
     renderizarUsuarios(usuariosGlobal);
+    cargarFiltroCursosAdmin();
+    cargarCursosAlumnoAdmin();
   } catch (error) {
     console.error("Error al cargar usuarios:", error);
   }
@@ -73,26 +76,76 @@ function renderizarUsuarios(listaUsuarios) {
 
   listaUsuarios.forEach((u) => {
     const tr = document.createElement("tr");
+
     tr.innerHTML = `
       <td>${u.id}</td>
       <td>${u.nombre} ${u.apellido}</td>
       <td>${u.correo}</td>
       <td>${u.rol}</td>
       <td>${u.asignatura || "-"}</td>
-      <td>${u.curso || "-"}</td>
+      <td>${u.rol === "alumno" ? (u.curso_matriculado || "Sin curso") : (u.curso || "-")}</td>
       <td>${u.es_profesor_jefe ? "Sí" : "No"}</td>
       <td>
         <button type="button" class="btn-table" onclick="editarUsuario(${u.id})">Editar</button>
         <button type="button" class="btn-table btn-danger" onclick="eliminarUsuario(${u.id})">Eliminar</button>
       </td>
     `;
+
     tbody.appendChild(tr);
   });
+}
+
+function cargarFiltroCursosAdmin() {
+  const select = document.getElementById("filtroCursoAdmin");
+  if (!select) return;
+
+  const cursos = [
+    ...new Set(
+      usuariosGlobal
+        .map((u) => (u.rol === "alumno" ? u.curso_matriculado : u.curso))
+        .filter(Boolean)
+    )
+  ];
+
+  select.innerHTML = `
+    <option value="">Todos los cursos</option>
+    <option value="sin_curso">Sin curso</option>
+  `;
+
+  cursos.forEach((curso) => {
+    const option = document.createElement("option");
+    option.value = curso;
+    option.textContent = curso;
+    select.appendChild(option);
+  });
+}
+
+async function cargarCursosAlumnoAdmin() {
+  const select = document.getElementById("cursoAlumnoAdmin");
+  if (!select) return;
+
+  try {
+    const res = await fetch("http://localhost:3000/api/docente-lecturas/cursos");
+    const cursos = await res.json();
+
+    select.innerHTML = `<option value="">Seleccionar curso del alumno</option>`;
+
+    cursos.forEach((c) => {
+      const option = document.createElement("option");
+      option.value = c.id;
+      option.textContent = `${c.nombre} - ${c.nivel} (${c.anio})`;
+      select.appendChild(option);
+    });
+  } catch (error) {
+    console.error("Error cargando cursos alumno:", error);
+    select.innerHTML = `<option value="">No se pudieron cargar cursos</option>`;
+  }
 }
 
 function abrirFormularioNuevoUsuario() {
   document.getElementById("formUsuarioContainer").classList.remove("hidden");
   document.getElementById("tituloFormularioUsuario").textContent = "Nuevo usuario";
+
   document.getElementById("usuarioId").value = "";
   document.getElementById("nombreUsuario").value = "";
   document.getElementById("apellidoUsuario").value = "";
@@ -104,7 +157,10 @@ function abrirFormularioNuevoUsuario() {
   document.getElementById("asignaturaUsuario").value = "";
   document.getElementById("cursoUsuario").value = "";
   document.getElementById("jefeUsuario").checked = false;
+
   document.getElementById("camposDocente").classList.add("hidden");
+  document.getElementById("camposAlumno").classList.remove("hidden");
+  document.getElementById("cursoAlumnoAdmin").value = "";
 }
 
 function cerrarFormularioUsuario() {
@@ -112,16 +168,18 @@ function cerrarFormularioUsuario() {
 }
 
 function editarUsuario(id) {
-  const usuarioEditar = usuariosGlobal.find((u) => u.id === id);
+  const usuarioEditar = usuariosGlobal.find((u) => Number(u.id) === Number(id));
   if (!usuarioEditar) return;
 
   document.getElementById("formUsuarioContainer").classList.remove("hidden");
   document.getElementById("tituloFormularioUsuario").textContent = "Editar usuario";
+
   document.getElementById("usuarioId").value = usuarioEditar.id;
-  document.getElementById("nombreUsuario").value = usuarioEditar.nombre;
-  document.getElementById("apellidoUsuario").value = usuarioEditar.apellido;
-  document.getElementById("correoUsuario").value = usuarioEditar.correo;
-  document.getElementById("rolUsuario").value = usuarioEditar.rol;
+  document.getElementById("nombreUsuario").value = usuarioEditar.nombre || "";
+  document.getElementById("apellidoUsuario").value = usuarioEditar.apellido || "";
+  document.getElementById("correoUsuario").value = usuarioEditar.correo || "";
+  document.getElementById("rolUsuario").value = usuarioEditar.rol || "alumno";
+
   document.getElementById("passwordUsuario").value = "";
   document.getElementById("passwordUsuario").style.display = "none";
 
@@ -129,10 +187,25 @@ function editarUsuario(id) {
   document.getElementById("cursoUsuario").value = usuarioEditar.curso || "";
   document.getElementById("jefeUsuario").checked = usuarioEditar.es_profesor_jefe || false;
 
+  const camposDocente = document.getElementById("camposDocente");
+  const camposAlumno = document.getElementById("camposAlumno");
+  const selectCursoAlumno = document.getElementById("cursoAlumnoAdmin");
+
   if (usuarioEditar.rol === "docente") {
-    document.getElementById("camposDocente").classList.remove("hidden");
+    camposDocente.classList.remove("hidden");
+    camposAlumno.classList.add("hidden");
+  } else if (usuarioEditar.rol === "alumno") {
+    camposAlumno.classList.remove("hidden");
+    camposDocente.classList.add("hidden");
+
+    if (selectCursoAlumno) {
+      setTimeout(() => {
+    selectCursoAlumno.value = usuarioEditar.curso_id || "";
+      }, 200);
+    }
   } else {
-    document.getElementById("camposDocente").classList.add("hidden");
+    camposAlumno.classList.add("hidden");
+    camposDocente.classList.add("hidden");
   }
 }
 
@@ -147,6 +220,7 @@ async function guardarUsuario() {
   const asignatura = document.getElementById("asignaturaUsuario").value.trim();
   const curso = document.getElementById("cursoUsuario").value.trim();
   const es_profesor_jefe = document.getElementById("jefeUsuario").checked;
+  const curso_id = document.getElementById("cursoAlumnoAdmin")?.value || null;
 
   try {
     let response;
@@ -158,7 +232,8 @@ async function guardarUsuario() {
       rol,
       asignatura,
       curso,
-      es_profesor_jefe
+      es_profesor_jefe,
+      curso_id
     };
 
     if (!id) {
@@ -169,13 +244,13 @@ async function guardarUsuario() {
       response = await fetch(`http://localhost:3000/api/admin/usuarios/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(bodyData),
+        body: JSON.stringify(bodyData)
       });
     } else {
       response = await fetch("http://localhost:3000/api/admin/usuarios", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(bodyData),
+        body: JSON.stringify(bodyData)
       });
     }
 
@@ -187,6 +262,7 @@ async function guardarUsuario() {
     }
 
     cerrarFormularioUsuario();
+
     await cargarUsuarios();
     await cargarResumenSistema();
     await cargarAlertasSistema();
@@ -200,7 +276,7 @@ async function guardarUsuario() {
 }
 
 async function eliminarUsuario(id) {
-  if (usuario && usuario.id === id) {
+  if (usuario && Number(usuario.id) === Number(id)) {
     alert("No puedes eliminar tu propio usuario");
     return;
   }
@@ -210,7 +286,7 @@ async function eliminarUsuario(id) {
 
   try {
     const response = await fetch(`http://localhost:3000/api/admin/usuarios/${id}`, {
-      method: "DELETE",
+      method: "DELETE"
     });
 
     const data = await response.json();
@@ -234,18 +310,33 @@ async function eliminarUsuario(id) {
 
 function filtrarUsuarios() {
   const input = document.getElementById("buscadorUsuarios");
+  const filtroCurso = document.getElementById("filtroCursoAdmin")?.value || "";
+
   if (!input) return;
 
   const texto = input.value.toLowerCase().trim();
 
   const filtrados = usuariosGlobal.filter((u) => {
     const nombreCompleto = `${u.nombre} ${u.apellido}`.toLowerCase();
+
+    const cursoReal = u.rol === "alumno"
+      ? (u.curso_matriculado || "")
+      : (u.curso || "");
+
+    const cumpleCurso =
+      filtroCurso === "" ||
+      (filtroCurso === "sin_curso" && !cursoReal) ||
+      cursoReal === filtroCurso;
+
     return (
-      nombreCompleto.includes(texto) ||
-      u.correo.toLowerCase().includes(texto) ||
-      u.rol.toLowerCase().includes(texto) ||
-      (u.asignatura || "").toLowerCase().includes(texto) ||
-      (u.curso || "").toLowerCase().includes(texto)
+      (
+        nombreCompleto.includes(texto) ||
+        u.correo.toLowerCase().includes(texto) ||
+        u.rol.toLowerCase().includes(texto) ||
+        (u.asignatura || "").toLowerCase().includes(texto) ||
+        cursoReal.toLowerCase().includes(texto)
+      ) &&
+      cumpleCurso
     );
   });
 
@@ -282,6 +373,7 @@ function renderizarAuditoria(lista) {
     const nombreUsuario = item.nombre ? `${item.nombre} ${item.apellido || ""}`.trim() : "Sistema";
 
     const tr = document.createElement("tr");
+
     tr.innerHTML = `
       <td>${nombreUsuario}</td>
       <td>${item.tipo_evento || "-"}</td>
@@ -289,6 +381,7 @@ function renderizarAuditoria(lista) {
       <td>${hora}</td>
       <td>${item.detalle || "-"}</td>
     `;
+
     tbody.appendChild(tr);
   });
 }
@@ -297,6 +390,7 @@ function filtrarAuditoria() {
   const inputUsuario = document.getElementById("filtroAuditoriaUsuario");
   const inputAccion = document.getElementById("filtroAuditoriaAccion");
   const inputFecha = document.getElementById("filtroAuditoriaFecha");
+
   if (!inputUsuario || !inputAccion || !inputFecha) return;
 
   const filtroUsuario = inputUsuario.value.toLowerCase().trim();
@@ -425,6 +519,7 @@ function exportarAuditoria() {
 
 function respaldarSistema() {
   const estado = document.getElementById("estadoRespaldo");
+
   if (estado) {
     estado.textContent = "Generando respaldo...";
   }
@@ -474,9 +569,11 @@ async function verificarSeguridad() {
     }
   } catch (error) {
     console.error("Error al verificar seguridad:", error);
+
     if (estado) {
       estado.textContent = "Error al verificar seguridad";
     }
+
     if (detalle) {
       detalle.classList.remove("hidden");
       detalle.innerHTML = `<p>No fue posible completar la verificación.</p>`;
@@ -495,7 +592,7 @@ function mostrarSeccion(seccion, element) {
     usuarios: document.getElementById("seccion-usuarios"),
     auditoria: document.getElementById("seccion-auditoria"),
     reportes: document.getElementById("seccion-reportes"),
-    seguridad: document.getElementById("seccion-seguridad"),
+    seguridad: document.getElementById("seccion-seguridad")
   };
 
   Object.values(secciones).forEach((sec) => {
@@ -526,6 +623,7 @@ function mostrarSeccion(seccion, element) {
 
 document.addEventListener("DOMContentLoaded", () => {
   const nombreAdmin = document.getElementById("nombreAdmin");
+
   if (nombreAdmin && usuario) {
     nombreAdmin.textContent = usuario.nombre;
   }
@@ -533,6 +631,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const buscador = document.getElementById("buscadorUsuarios");
   if (buscador) {
     buscador.addEventListener("input", filtrarUsuarios);
+  }
+
+  const filtroCurso = document.getElementById("filtroCursoAdmin");
+  if (filtroCurso) {
+    filtroCurso.addEventListener("change", filtrarUsuarios);
   }
 
   const filtroUsuario = document.getElementById("filtroAuditoriaUsuario");
@@ -546,25 +649,38 @@ document.addEventListener("DOMContentLoaded", () => {
   const rolUsuario = document.getElementById("rolUsuario");
   if (rolUsuario) {
     rolUsuario.addEventListener("change", function () {
-      const campos = document.getElementById("camposDocente");
-      if (!campos) return;
+      const camposDocente = document.getElementById("camposDocente");
+      const camposAlumno = document.getElementById("camposAlumno");
 
       if (this.value === "docente") {
-        campos.classList.remove("hidden");
-      } else {
-        campos.classList.add("hidden");
+        camposDocente.classList.remove("hidden");
+        camposAlumno.classList.add("hidden");
+      } else if (this.value === "alumno") {
+        camposAlumno.classList.remove("hidden");
+        camposDocente.classList.add("hidden");
+
         document.getElementById("asignaturaUsuario").value = "";
         document.getElementById("cursoUsuario").value = "";
         document.getElementById("jefeUsuario").checked = false;
+      } else {
+        camposAlumno.classList.add("hidden");
+        camposDocente.classList.add("hidden");
+
+        document.getElementById("asignaturaUsuario").value = "";
+        document.getElementById("cursoUsuario").value = "";
+        document.getElementById("jefeUsuario").checked = false;
+        document.getElementById("cursoAlumnoAdmin").value = "";
       }
     });
   }
 
   cargarResumenSistema();
   cargarAlertasSistema();
+  cargarCursosAlumnoAdmin();
   cargarUsuarios();
   cargarAuditoria();
   cargarResumenReportes();
+  
 
   mostrarSeccion("panel", document.querySelector(".menu-link.active"));
 });

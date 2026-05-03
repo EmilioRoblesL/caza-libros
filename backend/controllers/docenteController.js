@@ -237,9 +237,181 @@ const registrarAlumnoPendienteEnCursoDocente = async (req, res) => {
   }
 };
 
+const actualizarAlumnoCurso = async (req, res) => {
+  const { docenteId, alumnoId } = req.params;
+  const { nombre, apellido, correo } = req.body;
+
+  try {
+    if (!nombre || !apellido || !correo) {
+      return res.status(400).json({ message: "Completa todos los campos" });
+    }
+
+    const cursoRes = await pool.query(
+      `SELECT id FROM cursos WHERE docente_id = $1 LIMIT 1`,
+      [docenteId]
+    );
+
+    if (cursoRes.rows.length === 0) {
+      return res.status(404).json({ message: "El docente no tiene curso asignado" });
+    }
+
+    const matriculaRes = await pool.query(
+      `SELECT id FROM matriculas WHERE curso_id = $1 AND alumno_id = $2`,
+      [cursoRes.rows[0].id, alumnoId]
+    );
+
+    if (matriculaRes.rows.length === 0) {
+      return res.status(403).json({ message: "El alumno no pertenece al curso del docente" });
+    }
+
+    const actualizado = await pool.query(
+      `UPDATE usuarios
+       SET nombre = $1, apellido = $2, correo = $3
+       WHERE id = $4 AND rol = 'alumno'
+       RETURNING id, nombre, apellido, correo`,
+      [nombre.trim(), apellido.trim(), correo.trim(), alumnoId]
+    );
+
+    res.json({
+      message: "Alumno actualizado correctamente",
+      alumno: actualizado.rows[0]
+    });
+  } catch (error) {
+    console.error("Error al actualizar alumno:", error);
+    res.status(500).json({ message: "Error al actualizar alumno" });
+  }
+};
+
+const eliminarAlumnoCurso = async (req, res) => {
+  const { docenteId, alumnoId } = req.params;
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    const cursoRes = await client.query(
+      `SELECT id FROM cursos WHERE docente_id = $1 LIMIT 1`,
+      [docenteId]
+    );
+
+    if (cursoRes.rows.length === 0) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ message: "El docente no tiene curso asignado" });
+    }
+
+    const cursoId = cursoRes.rows[0].id;
+
+    const matriculaRes = await client.query(
+      `SELECT id FROM matriculas WHERE curso_id = $1 AND alumno_id = $2`,
+      [cursoId, alumnoId]
+    );
+
+    if (matriculaRes.rows.length === 0) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ message: "El alumno no pertenece al curso" });
+    }
+
+    await client.query(
+      `DELETE FROM matriculas WHERE curso_id = $1 AND alumno_id = $2`,
+      [cursoId, alumnoId]
+    );
+
+    await client.query(
+      `INSERT INTO eventos_log (usuario_id, tipo_evento, detalle)
+       VALUES ($1, $2, $3)`,
+      [docenteId, "eliminacion_alumno_curso", `Docente eliminó al alumno ${alumnoId} del curso ${cursoId}`]
+    );
+
+    await client.query("COMMIT");
+
+    res.json({ message: "Alumno eliminado del curso correctamente" });
+  } catch (error) {
+    await client.query("ROLLBACK");
+    console.error("Error al eliminar alumno:", error);
+    res.status(500).json({ message: "Error al eliminar alumno" });
+  } finally {
+    client.release();
+  }
+};
+
+const actualizarAlumnoPendiente = async (req, res) => {
+  const { docenteId, pendienteId } = req.params;
+  const { nombre, apellido, correo } = req.body;
+
+  try {
+    if (!nombre || !apellido || !correo) {
+      return res.status(400).json({ message: "Completa todos los campos" });
+    }
+
+    const cursoRes = await pool.query(
+      `SELECT id FROM cursos WHERE docente_id = $1 LIMIT 1`,
+      [docenteId]
+    );
+
+    if (cursoRes.rows.length === 0) {
+      return res.status(404).json({ message: "El docente no tiene curso asignado" });
+    }
+
+    const actualizado = await pool.query(
+      `UPDATE alumnos_pendientes
+       SET nombre = $1, apellido = $2, correo = $3
+       WHERE id = $4 AND curso_id = $5
+       RETURNING id, nombre, apellido, correo, estado, creado_en`,
+      [nombre.trim(), apellido.trim(), correo.trim(), pendienteId, cursoRes.rows[0].id]
+    );
+
+    if (actualizado.rows.length === 0) {
+      return res.status(404).json({ message: "Alumno pendiente no encontrado" });
+    }
+
+    res.json({
+      message: "Alumno pendiente actualizado correctamente",
+      alumno_pendiente: actualizado.rows[0]
+    });
+  } catch (error) {
+    console.error("Error al actualizar pendiente:", error);
+    res.status(500).json({ message: "Error al actualizar pendiente" });
+  }
+};
+
+const eliminarAlumnoPendiente = async (req, res) => {
+  const { docenteId, pendienteId } = req.params;
+
+  try {
+    const cursoRes = await pool.query(
+      `SELECT id FROM cursos WHERE docente_id = $1 LIMIT 1`,
+      [docenteId]
+    );
+
+    if (cursoRes.rows.length === 0) {
+      return res.status(404).json({ message: "El docente no tiene curso asignado" });
+    }
+
+    const eliminado = await pool.query(
+      `DELETE FROM alumnos_pendientes
+       WHERE id = $1 AND curso_id = $2
+       RETURNING id`,
+      [pendienteId, cursoRes.rows[0].id]
+    );
+
+    if (eliminado.rows.length === 0) {
+      return res.status(404).json({ message: "Alumno pendiente no encontrado" });
+    }
+
+    res.json({ message: "Alumno pendiente eliminado correctamente" });
+  } catch (error) {
+    console.error("Error al eliminar pendiente:", error);
+    res.status(500).json({ message: "Error al eliminar pendiente" });
+  }
+};
+
 module.exports = {
   obtenerAlumnos,
   obtenerResultadosGenerales,
   obtenerPanelDocente,
-  registrarAlumnoPendienteEnCursoDocente
+  registrarAlumnoPendienteEnCursoDocente,
+  actualizarAlumnoCurso,
+  eliminarAlumnoCurso,
+  actualizarAlumnoPendiente,
+  eliminarAlumnoPendiente
 };

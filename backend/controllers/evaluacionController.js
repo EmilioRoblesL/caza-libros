@@ -115,4 +115,40 @@ const responderEvaluacion = async (req, res) => {
   }
 };
 
-module.exports = { responderEvaluacion };
+const obtenerCuestionariosAlumno = async (req, res) => {
+  try {
+    const { alumnoId } = req.params;
+
+    const resultado = await pool.query(
+      `
+      SELECT 
+        q.id AS cuestionario_id,
+        q.titulo AS cuestionario_titulo,
+        q.lectura_id,
+        l.titulo AS lectura_titulo,
+        ca.enviado_en,
+        ca.activo
+      FROM cuestionarios_asignados ca
+      INNER JOIN cuestionarios q ON q.id = ca.cuestionario_id
+      INNER JOIN lecturas l ON l.id = q.lectura_id
+      INNER JOIN matriculas m ON m.curso_id = ca.curso_id
+      WHERE m.alumno_id = $1
+      AND ca.activo = TRUE
+      ORDER BY ca.enviado_en DESC
+      `,
+      [alumnoId]
+    );
+
+    res.json(resultado.rows);
+  } catch (error) {
+    console.error("Error al obtener cuestionarios del alumno:", error);
+    res.status(500).json({
+      message: "Error al obtener cuestionarios del alumno"
+    });
+  }
+};
+
+module.exports = {
+  responderEvaluacion,
+  obtenerCuestionariosAlumno
+};

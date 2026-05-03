@@ -177,15 +177,21 @@
         <section class="admin-panel">
           <h2>Crear nueva lectura</h2>
 
-          <select id="selectCursoLectura">
-            <option value="">Seleccionar curso</option>
-          </select>
+          <div class="form-admin form-lectura">
+            <select id="selectCursoLectura">
+              <option value="">Seleccionar curso</option>
+            </select>
 
-          <div class="form-admin">
-            <input type="text" id="tituloLectura" placeholder="Título" />
-            <input type="text" id="autorLectura" placeholder="Autor" />
-            <input type="text" id="nivelLectura" placeholder="Nivel de dificultad" />
-            <input type="text" id="categoriaLectura" placeholder="Categoría" />
+            <div class="grid-2">
+              <input type="text" id="tituloLectura" placeholder="Título" />
+              <input type="text" id="autorLectura" placeholder="Autor" />
+            </div>
+
+            <div class="grid-2">
+              <input type="text" id="nivelLectura" placeholder="Nivel de dificultad" />
+              <input type="text" id="categoriaLectura" placeholder="Categoría" />
+            </div>
+
             <textarea id="textoLectura" placeholder="Historia" rows="8"></textarea>
 
             <div class="btn-group-admin">
@@ -239,26 +245,26 @@
 
             <textarea id="textoPregunta" placeholder="Texto de la pregunta" rows="4"></textarea>
 
-            <div class="opciones-cuestionario">
-              <div class="opcion-item">
+              <div class="opciones-cuestionario">
+              <label class="opcion-item">
                 <input type="radio" name="opcionCorrecta" id="correcta1" value="1" checked />
                 <input type="text" id="respuesta1" placeholder="Respuesta 1" />
-              </div>
+              </label>
 
-              <div class="opcion-item">
+              <label class="opcion-item">
                 <input type="radio" name="opcionCorrecta" id="correcta2" value="2" />
                 <input type="text" id="respuesta2" placeholder="Respuesta 2" />
-              </div>
+              </label>
 
-              <div class="opcion-item">
+              <label class="opcion-item">
                 <input type="radio" name="opcionCorrecta" id="correcta3" value="3" />
                 <input type="text" id="respuesta3" placeholder="Respuesta 3" />
-              </div>
+              </label>
 
-              <div class="opcion-item">
+              <label class="opcion-item">
                 <input type="radio" name="opcionCorrecta" id="correcta4" value="4" />
                 <input type="text" id="respuesta4" placeholder="Respuesta 4" />
-              </div>
+              </label>
             </div>
 
             <div class="btn-group-admin">

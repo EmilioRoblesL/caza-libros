@@ -30,7 +30,7 @@ const obtenerCursosDisponibles = async (req, res) => {
 ========================= */
 const crearLecturaYAsignarCurso = async (req, res) => {
   const { docenteId } = req.params;
-  const { titulo, autor, nivel_dificultad, contenido, curso_id } = req.body;
+  const { titulo, autor, nivel_dificultad, categoria, contenido, curso_id } = req.body;
 
   const client = await pool.connect();
 
@@ -65,13 +65,14 @@ const crearLecturaYAsignarCurso = async (req, res) => {
     );
 
     const nuevaLectura = await client.query(
-      `INSERT INTO lecturas (titulo, autor, nivel_dificultad, contenido, creado_por)
-       VALUES ($1, $2, $3, $4, $5)
-       RETURNING *`,
+      `INSERT INTO lecturas (titulo, autor, nivel_dificultad, categoria, contenido, creado_por)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING *`,
       [
         titulo.trim(),
         autor?.trim() || null,
         nivel_dificultad.trim(),
+        categoria?.trim() || null,
         contenido.trim(),
         Number(docenteId)
       ]
@@ -121,20 +122,36 @@ const obtenerLecturasDocente = async (req, res) => {
   const { docenteId } = req.params;
 
   try {
-    const resultado = await pool.query(
+   const resultado = await pool.query(
       `
       SELECT 
         l.id,
         l.titulo,
         l.autor,
         l.nivel_dificultad,
+        l.categoria,
         l.contenido,
         l.creado_por,
+        MIN(al.curso_id) AS curso_id,
+        c.nombre AS curso_nombre,
+        c.nivel AS curso_nivel,
+        c.anio AS curso_anio,
         COUNT(al.id)::int AS total_asignaciones
       FROM lecturas l
       LEFT JOIN asignaciones_lectura al ON l.id = al.lectura_id
+      LEFT JOIN cursos c ON c.id = al.curso_id
       WHERE l.creado_por = $1
-      GROUP BY l.id, l.titulo, l.autor, l.nivel_dificultad, l.contenido, l.creado_por
+      GROUP BY 
+        l.id,
+        l.titulo,
+        l.autor,
+        l.nivel_dificultad,
+        l.categoria,
+        l.contenido,
+        l.creado_por,
+        c.nombre,
+        c.nivel,
+        c.anio
       ORDER BY l.id DESC
       `,
       [Number(docenteId)]

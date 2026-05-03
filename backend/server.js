@@ -13,6 +13,7 @@ const docenteRoutes = require("./routes/docenteRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const docenteLecturaRoutes = require("./routes/docenteLecturaRoutes");
 const cuestionarioRoutes = require("./routes/cuestionarioRoutes");
+const alumnoRoutes = require("./routes/alumnoRoutes");
 
 const app = express();
 
@@ -48,6 +49,7 @@ app.use("/api/docente", docenteRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/docente-lecturas", docenteLecturaRoutes);
 app.use("/api/cuestionarios", cuestionarioRoutes);
+app.use("/api/alumnos", alumnoRoutes);
 
 /* =========================
    ERROR HANDLER

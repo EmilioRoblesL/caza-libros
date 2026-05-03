@@ -65,9 +65,15 @@
           <h2>Gestión de Usuarios</h2>
 
           <div class="admin-actions">
-            <input type="text" id="buscadorUsuarios" placeholder="Buscar por nombre, apellido, correo o rol" />
-            <button type="button" onclick="abrirFormularioNuevoUsuario()">Agregar usuario</button>
-          </div>
+          <input type="text" id="buscadorUsuarios" placeholder="Buscar por nombre, apellido, correo, rol o curso" />
+
+          <select id="filtroCursoAdmin">
+            <option value="">Todos los cursos</option>
+            <option value="sin_curso">Sin curso</option>
+          </select>
+
+          <button type="button" onclick="abrirFormularioNuevoUsuario()">Agregar usuario</button>
+        </div>
 
           <div id="formUsuarioContainer" class="form-admin hidden">
             <h3 id="tituloFormularioUsuario">Nuevo usuario</h3>
@@ -83,6 +89,12 @@
               <option value="docente">Docente</option>
               <option value="admin">Admin</option>
             </select>
+
+            <div id="camposAlumno" class="hidden">
+              <select id="cursoAlumnoAdmin">
+                <option value="">Seleccionar curso del alumno</option>
+              </select>
+            </div>
 
             <!-- CAMPOS DOCENTE -->
             <div id="camposDocente" class="hidden">
