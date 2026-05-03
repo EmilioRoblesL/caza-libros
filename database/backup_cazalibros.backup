@@ -1,0 +1,2057 @@
+--
+-- PostgreSQL database dump
+--
+
+\restrict P3XZSZjNbIboHNXWL11ecfdFga6J6lxEHzOoCcVM5nUH0dsm3ZFbWHhE72jZ2SB
+
+-- Dumped from database version 16.13
+-- Dumped by pg_dump version 16.13
+
+-- Started on 2026-05-03 00:51:12
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+SET default_tablespace = '';
+
+SET default_table_access_method = heap;
+
+--
+-- TOC entry 250 (class 1259 OID 16695)
+-- Name: alternativas; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.alternativas (
+    id integer NOT NULL,
+    pregunta_id integer,
+    texto text,
+    es_correcta boolean DEFAULT false
+);
+
+
+ALTER TABLE public.alternativas OWNER TO postgres;
+
+--
+-- TOC entry 249 (class 1259 OID 16694)
+-- Name: alternativas_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.alternativas_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.alternativas_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 5152 (class 0 OID 0)
+-- Dependencies: 249
+-- Name: alternativas_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.alternativas_id_seq OWNED BY public.alternativas.id;
+
+
+--
+-- TOC entry 244 (class 1259 OID 16639)
+-- Name: alumnos_pendientes; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.alumnos_pendientes (
+    id integer NOT NULL,
+    curso_id integer NOT NULL,
+    nombre character varying(100) NOT NULL,
+    apellido character varying(100) NOT NULL,
+    correo character varying(150) NOT NULL,
+    estado character varying(30) DEFAULT 'pendiente'::character varying,
+    creado_en timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+
+ALTER TABLE public.alumnos_pendientes OWNER TO postgres;
+
+--
+-- TOC entry 243 (class 1259 OID 16638)
+-- Name: alumnos_pendientes_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.alumnos_pendientes_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.alumnos_pendientes_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 5153 (class 0 OID 0)
+-- Dependencies: 243
+-- Name: alumnos_pendientes_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.alumnos_pendientes_id_seq OWNED BY public.alumnos_pendientes.id;
+
+
+--
+-- TOC entry 224 (class 1259 OID 16461)
+-- Name: asignaciones; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.asignaciones (
+    id integer NOT NULL,
+    lectura_id integer NOT NULL,
+    curso_id integer,
+    alumno_id integer,
+    fecha_inicio date NOT NULL,
+    fecha_fin date NOT NULL,
+    CONSTRAINT asignaciones_check CHECK ((((curso_id IS NOT NULL) AND (alumno_id IS NULL)) OR ((curso_id IS NULL) AND (alumno_id IS NOT NULL))))
+);
+
+
+ALTER TABLE public.asignaciones OWNER TO postgres;
+
+--
+-- TOC entry 223 (class 1259 OID 16460)
+-- Name: asignaciones_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.asignaciones_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.asignaciones_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 5154 (class 0 OID 0)
+-- Dependencies: 223
+-- Name: asignaciones_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.asignaciones_id_seq OWNED BY public.asignaciones.id;
+
+
+--
+-- TOC entry 246 (class 1259 OID 16657)
+-- Name: asignaciones_lectura; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.asignaciones_lectura (
+    id integer NOT NULL,
+    lectura_id integer NOT NULL,
+    alumno_id integer NOT NULL,
+    curso_id integer NOT NULL,
+    fecha_asignacion timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    estado character varying(30) DEFAULT 'asignada'::character varying
+);
+
+
+ALTER TABLE public.asignaciones_lectura OWNER TO postgres;
+
+--
+-- TOC entry 245 (class 1259 OID 16656)
+-- Name: asignaciones_lectura_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.asignaciones_lectura_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.asignaciones_lectura_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 5155 (class 0 OID 0)
+-- Dependencies: 245
+-- Name: asignaciones_lectura_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.asignaciones_lectura_id_seq OWNED BY public.asignaciones_lectura.id;
+
+
+--
+-- TOC entry 240 (class 1259 OID 16602)
+-- Name: canjes; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.canjes (
+    id integer NOT NULL,
+    alumno_id integer NOT NULL,
+    recompensa_id integer NOT NULL,
+    puntos_gastados integer NOT NULL,
+    fecha_canje timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+
+ALTER TABLE public.canjes OWNER TO postgres;
+
+--
+-- TOC entry 239 (class 1259 OID 16601)
+-- Name: canjes_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.canjes_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.canjes_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 5156 (class 0 OID 0)
+-- Dependencies: 239
+-- Name: canjes_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.canjes_id_seq OWNED BY public.canjes.id;
+
+
+--
+-- TOC entry 248 (class 1259 OID 16684)
+-- Name: cuestionarios; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.cuestionarios (
+    id integer NOT NULL,
+    docente_id integer,
+    lectura_id integer,
+    titulo text,
+    estado character varying(20) DEFAULT 'borrador'::character varying,
+    creado_en timestamp without time zone DEFAULT now(),
+    curso_id integer,
+    actualizado_en timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+
+ALTER TABLE public.cuestionarios OWNER TO postgres;
+
+--
+-- TOC entry 252 (class 1259 OID 16710)
+-- Name: cuestionarios_asignados; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.cuestionarios_asignados (
+    id integer NOT NULL,
+    cuestionario_id integer,
+    curso_id integer,
+    fecha_envio timestamp without time zone DEFAULT now(),
+    activo boolean DEFAULT true,
+    enviado_por integer,
+    enviado_en timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+
+ALTER TABLE public.cuestionarios_asignados OWNER TO postgres;
+
+--
+-- TOC entry 251 (class 1259 OID 16709)
+-- Name: cuestionarios_asignados_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.cuestionarios_asignados_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.cuestionarios_asignados_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 5157 (class 0 OID 0)
+-- Dependencies: 251
+-- Name: cuestionarios_asignados_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.cuestionarios_asignados_id_seq OWNED BY public.cuestionarios_asignados.id;
+
+
+--
+-- TOC entry 247 (class 1259 OID 16683)
+-- Name: cuestionarios_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.cuestionarios_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.cuestionarios_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 5158 (class 0 OID 0)
+-- Dependencies: 247
+-- Name: cuestionarios_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.cuestionarios_id_seq OWNED BY public.cuestionarios.id;
+
+
+--
+-- TOC entry 218 (class 1259 OID 16413)
+-- Name: cursos; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.cursos (
+    id integer NOT NULL,
+    nombre character varying(50) NOT NULL,
+    nivel character varying(20) NOT NULL,
+    anio integer NOT NULL,
+    docente_id integer
+);
+
+
+ALTER TABLE public.cursos OWNER TO postgres;
+
+--
+-- TOC entry 217 (class 1259 OID 16412)
+-- Name: cursos_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.cursos_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.cursos_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 5159 (class 0 OID 0)
+-- Dependencies: 217
+-- Name: cursos_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.cursos_id_seq OWNED BY public.cursos.id;
+
+
+--
+-- TOC entry 242 (class 1259 OID 16620)
+-- Name: eventos_log; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.eventos_log (
+    id integer NOT NULL,
+    usuario_id integer,
+    tipo_evento character varying(100) NOT NULL,
+    detalle text,
+    fecha_hora timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+
+ALTER TABLE public.eventos_log OWNER TO postgres;
+
+--
+-- TOC entry 241 (class 1259 OID 16619)
+-- Name: eventos_log_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.eventos_log_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.eventos_log_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 5160 (class 0 OID 0)
+-- Dependencies: 241
+-- Name: eventos_log_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.eventos_log_id_seq OWNED BY public.eventos_log.id;
+
+
+--
+-- TOC entry 230 (class 1259 OID 16514)
+-- Name: intentos; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.intentos (
+    id integer NOT NULL,
+    alumno_id integer NOT NULL,
+    lectura_id integer NOT NULL,
+    puntaje numeric(5,2) DEFAULT 0 NOT NULL,
+    aprobado boolean DEFAULT false,
+    duracion_seg integer,
+    creado_en timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    cuestionario_id integer
+);
+
+
+ALTER TABLE public.intentos OWNER TO postgres;
+
+--
+-- TOC entry 229 (class 1259 OID 16513)
+-- Name: intentos_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.intentos_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.intentos_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 5161 (class 0 OID 0)
+-- Dependencies: 229
+-- Name: intentos_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.intentos_id_seq OWNED BY public.intentos.id;
+
+
+--
+-- TOC entry 222 (class 1259 OID 16446)
+-- Name: lecturas; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.lecturas (
+    id integer NOT NULL,
+    titulo character varying(200) NOT NULL,
+    autor character varying(100),
+    nivel_dificultad character varying(20) NOT NULL,
+    contenido text NOT NULL,
+    creado_por integer,
+    creado_en timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    categoria character varying(100)
+);
+
+
+ALTER TABLE public.lecturas OWNER TO postgres;
+
+--
+-- TOC entry 221 (class 1259 OID 16445)
+-- Name: lecturas_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.lecturas_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.lecturas_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 5162 (class 0 OID 0)
+-- Dependencies: 221
+-- Name: lecturas_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.lecturas_id_seq OWNED BY public.lecturas.id;
+
+
+--
+-- TOC entry 220 (class 1259 OID 16425)
+-- Name: matriculas; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.matriculas (
+    id integer NOT NULL,
+    alumno_id integer NOT NULL,
+    curso_id integer NOT NULL,
+    fecha_matricula date DEFAULT CURRENT_DATE,
+    estado character varying(20) DEFAULT 'activa'::character varying
+);
+
+
+ALTER TABLE public.matriculas OWNER TO postgres;
+
+--
+-- TOC entry 219 (class 1259 OID 16424)
+-- Name: matriculas_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.matriculas_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.matriculas_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 5163 (class 0 OID 0)
+-- Dependencies: 219
+-- Name: matriculas_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.matriculas_id_seq OWNED BY public.matriculas.id;
+
+
+--
+-- TOC entry 228 (class 1259 OID 16499)
+-- Name: opciones; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.opciones (
+    id integer NOT NULL,
+    pregunta_id integer NOT NULL,
+    texto text NOT NULL,
+    es_correcta boolean DEFAULT false NOT NULL
+);
+
+
+ALTER TABLE public.opciones OWNER TO postgres;
+
+--
+-- TOC entry 227 (class 1259 OID 16498)
+-- Name: opciones_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.opciones_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.opciones_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 5164 (class 0 OID 0)
+-- Dependencies: 227
+-- Name: opciones_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.opciones_id_seq OWNED BY public.opciones.id;
+
+
+--
+-- TOC entry 226 (class 1259 OID 16484)
+-- Name: preguntas; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.preguntas (
+    id integer NOT NULL,
+    lectura_id integer NOT NULL,
+    enunciado text NOT NULL,
+    tipo character varying(20) DEFAULT 'unica'::character varying,
+    orden_pregunta integer NOT NULL,
+    cuestionario_id integer
+);
+
+
+ALTER TABLE public.preguntas OWNER TO postgres;
+
+--
+-- TOC entry 225 (class 1259 OID 16483)
+-- Name: preguntas_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.preguntas_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.preguntas_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 5165 (class 0 OID 0)
+-- Dependencies: 225
+-- Name: preguntas_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.preguntas_id_seq OWNED BY public.preguntas.id;
+
+
+--
+-- TOC entry 234 (class 1259 OID 16556)
+-- Name: progreso_lectura; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.progreso_lectura (
+    id integer NOT NULL,
+    alumno_id integer NOT NULL,
+    lectura_id integer NOT NULL,
+    porcentaje_avance integer DEFAULT 0 NOT NULL,
+    ultima_pagina integer DEFAULT 1,
+    actualizado_en timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT progreso_lectura_porcentaje_avance_check CHECK (((porcentaje_avance >= 0) AND (porcentaje_avance <= 100)))
+);
+
+
+ALTER TABLE public.progreso_lectura OWNER TO postgres;
+
+--
+-- TOC entry 233 (class 1259 OID 16555)
+-- Name: progreso_lectura_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.progreso_lectura_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.progreso_lectura_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 5166 (class 0 OID 0)
+-- Dependencies: 233
+-- Name: progreso_lectura_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.progreso_lectura_id_seq OWNED BY public.progreso_lectura.id;
+
+
+--
+-- TOC entry 238 (class 1259 OID 16589)
+-- Name: puntos; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.puntos (
+    id integer NOT NULL,
+    alumno_id integer NOT NULL,
+    motivo character varying(150) NOT NULL,
+    delta integer NOT NULL,
+    creado_en timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+
+ALTER TABLE public.puntos OWNER TO postgres;
+
+--
+-- TOC entry 237 (class 1259 OID 16588)
+-- Name: puntos_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.puntos_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.puntos_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 5167 (class 0 OID 0)
+-- Dependencies: 237
+-- Name: puntos_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.puntos_id_seq OWNED BY public.puntos.id;
+
+
+--
+-- TOC entry 236 (class 1259 OID 16579)
+-- Name: recompensas; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.recompensas (
+    id integer NOT NULL,
+    nombre character varying(100) NOT NULL,
+    descripcion text,
+    puntos_necesarios integer NOT NULL,
+    CONSTRAINT recompensas_puntos_necesarios_check CHECK ((puntos_necesarios >= 0))
+);
+
+
+ALTER TABLE public.recompensas OWNER TO postgres;
+
+--
+-- TOC entry 235 (class 1259 OID 16578)
+-- Name: recompensas_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.recompensas_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.recompensas_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 5168 (class 0 OID 0)
+-- Dependencies: 235
+-- Name: recompensas_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.recompensas_id_seq OWNED BY public.recompensas.id;
+
+
+--
+-- TOC entry 232 (class 1259 OID 16534)
+-- Name: respuestas; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.respuestas (
+    id integer NOT NULL,
+    intento_id integer NOT NULL,
+    pregunta_id integer NOT NULL,
+    opcion_id integer NOT NULL,
+    correcta boolean NOT NULL
+);
+
+
+ALTER TABLE public.respuestas OWNER TO postgres;
+
+--
+-- TOC entry 254 (class 1259 OID 16725)
+-- Name: respuestas_alumno; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.respuestas_alumno (
+    id integer NOT NULL,
+    alumno_id integer,
+    pregunta_id integer,
+    alternativa_id integer,
+    es_correcta boolean,
+    respondido_en timestamp without time zone DEFAULT now()
+);
+
+
+ALTER TABLE public.respuestas_alumno OWNER TO postgres;
+
+--
+-- TOC entry 253 (class 1259 OID 16724)
+-- Name: respuestas_alumno_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.respuestas_alumno_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.respuestas_alumno_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 5169 (class 0 OID 0)
+-- Dependencies: 253
+-- Name: respuestas_alumno_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.respuestas_alumno_id_seq OWNED BY public.respuestas_alumno.id;
+
+
+--
+-- TOC entry 231 (class 1259 OID 16533)
+-- Name: respuestas_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.respuestas_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.respuestas_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 5170 (class 0 OID 0)
+-- Dependencies: 231
+-- Name: respuestas_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.respuestas_id_seq OWNED BY public.respuestas.id;
+
+
+--
+-- TOC entry 216 (class 1259 OID 16400)
+-- Name: usuarios; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.usuarios (
+    id integer NOT NULL,
+    nombre character varying(100) NOT NULL,
+    apellido character varying(100) NOT NULL,
+    correo character varying(150) NOT NULL,
+    password text NOT NULL,
+    rol character varying(20) NOT NULL,
+    creado_en timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    activo boolean DEFAULT false,
+    verification_token text,
+    asignatura character varying(100),
+    curso character varying(50),
+    es_profesor_jefe boolean DEFAULT false,
+    CONSTRAINT usuarios_rol_check CHECK (((rol)::text = ANY ((ARRAY['alumno'::character varying, 'docente'::character varying, 'admin'::character varying])::text[])))
+);
+
+
+ALTER TABLE public.usuarios OWNER TO postgres;
+
+--
+-- TOC entry 215 (class 1259 OID 16399)
+-- Name: usuarios_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.usuarios_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.usuarios_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 5171 (class 0 OID 0)
+-- Dependencies: 215
+-- Name: usuarios_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.usuarios_id_seq OWNED BY public.usuarios.id;
+
+
+--
+-- TOC entry 4871 (class 2604 OID 16698)
+-- Name: alternativas id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.alternativas ALTER COLUMN id SET DEFAULT nextval('public.alternativas_id_seq'::regclass);
+
+
+--
+-- TOC entry 4861 (class 2604 OID 16642)
+-- Name: alumnos_pendientes id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.alumnos_pendientes ALTER COLUMN id SET DEFAULT nextval('public.alumnos_pendientes_id_seq'::regclass);
+
+
+--
+-- TOC entry 4840 (class 2604 OID 16464)
+-- Name: asignaciones id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.asignaciones ALTER COLUMN id SET DEFAULT nextval('public.asignaciones_id_seq'::regclass);
+
+
+--
+-- TOC entry 4864 (class 2604 OID 16660)
+-- Name: asignaciones_lectura id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.asignaciones_lectura ALTER COLUMN id SET DEFAULT nextval('public.asignaciones_lectura_id_seq'::regclass);
+
+
+--
+-- TOC entry 4857 (class 2604 OID 16605)
+-- Name: canjes id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.canjes ALTER COLUMN id SET DEFAULT nextval('public.canjes_id_seq'::regclass);
+
+
+--
+-- TOC entry 4867 (class 2604 OID 16687)
+-- Name: cuestionarios id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.cuestionarios ALTER COLUMN id SET DEFAULT nextval('public.cuestionarios_id_seq'::regclass);
+
+
+--
+-- TOC entry 4873 (class 2604 OID 16713)
+-- Name: cuestionarios_asignados id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.cuestionarios_asignados ALTER COLUMN id SET DEFAULT nextval('public.cuestionarios_asignados_id_seq'::regclass);
+
+
+--
+-- TOC entry 4834 (class 2604 OID 16416)
+-- Name: cursos id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.cursos ALTER COLUMN id SET DEFAULT nextval('public.cursos_id_seq'::regclass);
+
+
+--
+-- TOC entry 4859 (class 2604 OID 16623)
+-- Name: eventos_log id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.eventos_log ALTER COLUMN id SET DEFAULT nextval('public.eventos_log_id_seq'::regclass);
+
+
+--
+-- TOC entry 4845 (class 2604 OID 16517)
+-- Name: intentos id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.intentos ALTER COLUMN id SET DEFAULT nextval('public.intentos_id_seq'::regclass);
+
+
+--
+-- TOC entry 4838 (class 2604 OID 16449)
+-- Name: lecturas id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.lecturas ALTER COLUMN id SET DEFAULT nextval('public.lecturas_id_seq'::regclass);
+
+
+--
+-- TOC entry 4835 (class 2604 OID 16428)
+-- Name: matriculas id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.matriculas ALTER COLUMN id SET DEFAULT nextval('public.matriculas_id_seq'::regclass);
+
+
+--
+-- TOC entry 4843 (class 2604 OID 16502)
+-- Name: opciones id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.opciones ALTER COLUMN id SET DEFAULT nextval('public.opciones_id_seq'::regclass);
+
+
+--
+-- TOC entry 4841 (class 2604 OID 16487)
+-- Name: preguntas id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.preguntas ALTER COLUMN id SET DEFAULT nextval('public.preguntas_id_seq'::regclass);
+
+
+--
+-- TOC entry 4850 (class 2604 OID 16559)
+-- Name: progreso_lectura id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.progreso_lectura ALTER COLUMN id SET DEFAULT nextval('public.progreso_lectura_id_seq'::regclass);
+
+
+--
+-- TOC entry 4855 (class 2604 OID 16592)
+-- Name: puntos id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.puntos ALTER COLUMN id SET DEFAULT nextval('public.puntos_id_seq'::regclass);
+
+
+--
+-- TOC entry 4854 (class 2604 OID 16582)
+-- Name: recompensas id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.recompensas ALTER COLUMN id SET DEFAULT nextval('public.recompensas_id_seq'::regclass);
+
+
+--
+-- TOC entry 4849 (class 2604 OID 16537)
+-- Name: respuestas id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.respuestas ALTER COLUMN id SET DEFAULT nextval('public.respuestas_id_seq'::regclass);
+
+
+--
+-- TOC entry 4877 (class 2604 OID 16728)
+-- Name: respuestas_alumno id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.respuestas_alumno ALTER COLUMN id SET DEFAULT nextval('public.respuestas_alumno_id_seq'::regclass);
+
+
+--
+-- TOC entry 4830 (class 2604 OID 16403)
+-- Name: usuarios id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.usuarios ALTER COLUMN id SET DEFAULT nextval('public.usuarios_id_seq'::regclass);
+
+
+--
+-- TOC entry 5142 (class 0 OID 16695)
+-- Dependencies: 250
+-- Data for Name: alternativas; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.alternativas (id, pregunta_id, texto, es_correcta) FROM stdin;
+\.
+
+
+--
+-- TOC entry 5136 (class 0 OID 16639)
+-- Dependencies: 244
+-- Data for Name: alumnos_pendientes; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.alumnos_pendientes (id, curso_id, nombre, apellido, correo, estado, creado_en) FROM stdin;
+\.
+
+
+--
+-- TOC entry 5116 (class 0 OID 16461)
+-- Dependencies: 224
+-- Data for Name: asignaciones; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.asignaciones (id, lectura_id, curso_id, alumno_id, fecha_inicio, fecha_fin) FROM stdin;
+\.
+
+
+--
+-- TOC entry 5138 (class 0 OID 16657)
+-- Dependencies: 246
+-- Data for Name: asignaciones_lectura; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.asignaciones_lectura (id, lectura_id, alumno_id, curso_id, fecha_asignacion, estado) FROM stdin;
+7	6	24	8	2026-05-02 21:17:07.635259	asignada
+\.
+
+
+--
+-- TOC entry 5132 (class 0 OID 16602)
+-- Dependencies: 240
+-- Data for Name: canjes; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.canjes (id, alumno_id, recompensa_id, puntos_gastados, fecha_canje) FROM stdin;
+\.
+
+
+--
+-- TOC entry 5140 (class 0 OID 16684)
+-- Dependencies: 248
+-- Data for Name: cuestionarios; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.cuestionarios (id, docente_id, lectura_id, titulo, estado, creado_en, curso_id, actualizado_en) FROM stdin;
+4	23	6	Cuestionario: Las aventuras de Pinocho	enviado	2026-05-02 21:27:40.989602	8	2026-05-02 21:30:16.430881
+\.
+
+
+--
+-- TOC entry 5144 (class 0 OID 16710)
+-- Dependencies: 252
+-- Data for Name: cuestionarios_asignados; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.cuestionarios_asignados (id, cuestionario_id, curso_id, fecha_envio, activo, enviado_por, enviado_en) FROM stdin;
+3	4	8	2026-05-02 21:30:16.426199	t	23	2026-05-02 21:30:16.426199
+\.
+
+
+--
+-- TOC entry 5110 (class 0 OID 16413)
+-- Dependencies: 218
+-- Data for Name: cursos; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.cursos (id, nombre, nivel, anio, docente_id) FROM stdin;
+2	4° Básico A	Básica	2026	\N
+6	1basico	Básica	2026	\N
+1	3° Básico A	Básica	2026	\N
+3	4° Básico B	Básica	2026	\N
+4	4° Básico C	Básica	2026	\N
+5	5° Básico A	Básica	2026	\N
+7	1° Básico C	Básica	2026	\N
+8	3° Básico B	Básica	2026	23
+\.
+
+
+--
+-- TOC entry 5134 (class 0 OID 16620)
+-- Dependencies: 242
+-- Data for Name: eventos_log; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.eventos_log (id, usuario_id, tipo_evento, detalle, fecha_hora) FROM stdin;
+1	\N	mantenimiento	Mantenimiento del sistema programado para el 15/03	2026-03-29 01:42:52.393134
+2	\N	registro	Nuevo usuario registrado: María González	2026-03-29 01:42:52.393134
+3	\N	seguridad	Error en el correo electrónico de restablecimiento de contraseña para usuario@ejemplo.com	2026-03-29 01:42:52.393134
+6	\N	actualizacion_usuario	Administrador actualizó usuario: juana morales	2026-03-29 18:08:46.496589
+7	\N	eliminacion_usuario	Administrador eliminó usuario: juana morales	2026-03-29 18:09:04.04768
+8	\N	eliminacion_usuario	Administrador eliminó usuario: Juana DeArco	2026-03-29 18:13:25.86022
+4	\N	registro	Nuevo usuario registrado: segundo lizama	2026-03-29 17:53:00.90718
+5	\N	error_password	Error de contraseña para usuario tio@gmail.com	2026-03-29 17:53:37.924525
+9	\N	eliminacion_usuario	Administrador eliminó usuario: segundo lizama	2026-03-29 18:54:03.980354
+10	\N	eliminacion_usuario	Administrador eliminó usuario: sasasas sasasasass	2026-03-29 18:55:16.213685
+11	\N	error_login	Intento fallido de login con correo: cony@gmail.com	2026-03-29 19:04:17.444951
+12	\N	error_login	Intento fallido de login con correo: cony@gmail.com	2026-03-29 19:04:18.738638
+13	\N	eliminacion_usuario	Administrador eliminó usuario: Emilio Robles	2026-03-29 19:33:42.423519
+14	\N	error_login	Intento fallido de login con correo: cony@gmail.com0	2026-04-04 17:42:37.232674
+15	\N	error_login	Intento fallido de login con correo: cony@gmail.com	2026-04-04 17:42:40.677302
+16	\N	error_login	Intento fallido de login con correo: cony@gmail.com	2026-04-04 17:42:41.996021
+17	\N	error_login	Intento fallido de login con correo: cony@gmail.com	2026-04-04 17:42:43.502158
+18	\N	error_login	Intento fallido de login con correo: cony@gmail.com	2026-04-04 17:42:44.852692
+57	\N	error_login	Intento fallido de login con correo: c@gmail.com	2026-04-05 20:21:23.406876
+58	\N	error_login	Intento fallido de login con correo: c@gmail.com	2026-04-05 22:42:35.877316
+59	\N	error_login	Intento fallido de login con correo: c@gmail.com	2026-04-05 22:42:40.754356
+21	\N	actualizacion_usuario	Administrador actualizó usuario: Lady Pino	2026-04-04 23:25:06.221423
+22	\N	registro	Nuevo usuario registrado: Adrian Morales	2026-04-05 00:02:29.485679
+24	\N	actualizacion_usuario	Administrador actualizó usuario: Adrian Morales	2026-04-05 00:16:26.544103
+23	\N	registro	Nuevo usuario registrado: Andres Mendez	2026-04-05 00:07:53.71378
+25	\N	actualizacion_usuario	Administrador actualizó usuario: Andres Mendez	2026-04-05 00:17:54.739664
+26	\N	registro	Nuevo usuario registrado: Juanita Perez	2026-04-05 00:19:05.999396
+27	\N	actualizacion_usuario	Administrador actualizó usuario: Juanita Perez	2026-04-05 00:19:51.249844
+29	\N	registro	Nuevo usuario registrado: Mario Meneses	2026-04-05 01:38:46.572325
+30	\N	actualizacion_usuario	Administrador actualizó usuario: Mario Meneses	2026-04-05 01:40:40.095566
+32	\N	registro	Nuevo usuario registrado: Francisco Lizama	2026-04-05 01:47:59.611131
+36	\N	registro	Nuevo usuario registrado: Lady Pino	2026-04-05 01:58:26.684598
+43	\N	registro	Nuevo usuario registrado: Elsa Del Carmen Lopez	2026-04-05 02:21:31.563944
+60	\N	registro	Nuevo usuario registrado: Anita Perez Gonzales	2026-04-29 17:16:30.660583
+61	\N	actualizacion_usuario	Administrador actualizó usuario: Anita Perez Gonzales	2026-04-29 17:17:39.63692
+62	\N	registro_alumno_pendiente	Docente agregó alumno pendiente Luis Peres Godoy al curso 1° Básico C	2026-04-29 17:18:41.4666
+63	\N	registro	Nuevo usuario registrado: Luis Perez Godoy	2026-04-29 17:19:48.884439
+68	\N	eliminacion_usuario	Administrador eliminó usuario: Emilio Robles	2026-05-02 20:47:51.88238
+69	\N	eliminacion_usuario	Administrador eliminó usuario: Emilia Robles	2026-05-02 20:47:54.7833
+70	\N	eliminacion_usuario	Administrador eliminó usuario: Lucas Robles	2026-05-02 20:47:59.563475
+19	\N	actualizacion_usuario	Administrador actualizó usuario: Manuel Garcia	2026-04-04 19:43:02.144638
+20	\N	actualizacion_usuario	Administrador actualizó usuario: Manuel Garcia	2026-04-04 20:10:56.563551
+71	\N	eliminacion_usuario	Administrador eliminó usuario: Manuel Garcia	2026-05-02 20:48:02.499757
+72	\N	eliminacion_usuario	Administrador eliminó usuario: Lady Pino	2026-05-02 20:48:11.637997
+73	\N	eliminacion_usuario	Administrador eliminó usuario: Jesus López	2026-05-02 20:48:13.530684
+74	\N	eliminacion_usuario	Administrador eliminó usuario: Adrian Morales	2026-05-02 20:48:15.51001
+75	\N	eliminacion_usuario	Administrador eliminó usuario: Andres Mendez	2026-05-02 20:48:17.235341
+28	\N	registro_alumno_pendiente	Docente agregó alumno pendiente Mario Meneses al curso 5° Básico A	2026-04-05 01:37:57.852189
+31	\N	registro_alumno_pendiente	Docente agregó alumno pendiente Francisco Lizama al curso 5° Básico A	2026-04-05 01:47:29.745973
+33	\N	registro_alumno_pendiente	Docente agregó alumno pendiente Francisco Lizama al curso 5° Básico A	2026-04-05 01:48:57.417663
+34	\N	registro_alumno_pendiente	Docente agregó alumno pendiente Mario Huechumil al curso 5° Básico A	2026-04-05 01:57:38.064942
+35	\N	registro_alumno_pendiente	Docente agregó alumno pendiente Lady Pino al curso 5° Básico A	2026-04-05 01:58:09.293023
+37	\N	actualizacion_alumno_curso	Docente actualizó alumno Lady Natalie Pino Ramirez del curso 5° Básico A	2026-04-05 02:16:50.008078
+38	\N	eliminacion_alumno_pendiente	Docente eliminó alumno pendiente 4 del curso 5° Básico A	2026-04-05 02:16:56.711261
+39	\N	eliminacion_alumno_pendiente	Docente eliminó alumno pendiente 2 del curso 5° Básico A	2026-04-05 02:16:58.677825
+40	\N	eliminacion_alumno_pendiente	Docente eliminó alumno pendiente 3 del curso 5° Básico A	2026-04-05 02:17:00.82964
+41	\N	eliminacion_alumno_pendiente	Docente eliminó alumno pendiente 1 del curso 5° Básico A	2026-04-05 02:17:03.125343
+42	\N	registro_alumno_pendiente	Docente agregó alumno pendiente Elsa Del Carmen Lopez al curso 5° Básico A	2026-04-05 02:18:01.37339
+44	\N	registro_alumno_pendiente	Docente agregó alumno pendiente Mario Meneses al curso 5° Básico A	2026-04-05 02:41:30.057263
+45	\N	actualizacion_alumno_pendiente	Docente actualizó alumno pendiente Mario Meneses del curso 5° Básico A	2026-04-05 02:49:33.581923
+46	\N	actualizacion_alumno_pendiente	Docente actualizó alumno pendiente Mario Meneses del curso 5° Básico A	2026-04-05 02:49:38.987422
+47	\N	eliminacion_alumno_pendiente	Docente eliminó alumno pendiente 7 del curso 5° Básico A	2026-04-05 02:49:49.427211
+48	\N	actualizacion_alumno_curso	Docente actualizó alumno Elsa Del Carmen Lopez Lizama del curso 5° Básico A	2026-04-05 02:50:03.302576
+49	\N	creacion_lectura_curso	Docente creó la lectura "Las aventuras de Pinocho" y la asignó al curso 5° Básico A	2026-04-05 17:27:47.400063
+50	\N	actualizacion_lectura	Docente actualizó la lectura "Las aventuras de Pinocho"	2026-04-05 17:30:38.198809
+51	\N	actualizacion_lectura	Docente actualizó la lectura "Las aventuras de Pinocho"	2026-04-05 17:30:49.692301
+52	\N	actualizacion_lectura	Docente actualizó la lectura "Las aventuras de Pinocho"	2026-04-05 17:33:34.994808
+53	\N	eliminacion_lectura	Docente eliminó la lectura "Las aventuras de Pinocho"	2026-04-05 17:34:45.746798
+54	\N	creacion_lectura_curso	Docente creó la lectura "Las aventuras de Pinocho" y la asignó al curso 5° Básico A	2026-04-05 17:34:55.129984
+55	\N	actualizacion_lectura	Docente actualizó la lectura "Las aventuras de Pinocho"	2026-04-05 19:43:17.691531
+56	\N	actualizacion_usuario	Administrador actualizó usuario: Juanita Perez	2026-04-05 20:21:02.042672
+64	\N	actualizacion_lectura	Docente actualizó la lectura "Las aventuras de Pinocho"	2026-05-02 19:34:27.910434
+65	\N	eliminacion_lectura	Docente eliminó la lectura "Las aventuras de Pinocho"	2026-05-02 20:41:02.374758
+66	\N	eliminacion_alumno_curso	Docente eliminó al alumno 20 del curso 5	2026-05-02 20:47:20.370012
+67	\N	eliminacion_alumno_curso	Docente eliminó al alumno 19 del curso 5	2026-05-02 20:47:23.024666
+76	\N	eliminacion_usuario	Administrador eliminó usuario: Juanita Perez	2026-05-02 20:48:19.203463
+77	\N	eliminacion_usuario	Administrador eliminó usuario: Mario Meneses	2026-05-02 20:48:21.437311
+78	\N	eliminacion_usuario	Administrador eliminó usuario: Francisco Lizama	2026-05-02 20:48:23.426777
+79	\N	eliminacion_usuario	Administrador eliminó usuario: Lady Natalie Pino Ramirez	2026-05-02 20:48:25.211132
+80	\N	eliminacion_usuario	Administrador eliminó usuario: Elsa Del Carmen Lopez Lizama	2026-05-02 20:48:26.901482
+81	\N	eliminacion_usuario	Administrador eliminó usuario: Anita Perez Gonzales	2026-05-02 20:48:28.357706
+82	\N	eliminacion_usuario	Administrador eliminó usuario: Luis Perez Godoy	2026-05-02 20:48:29.957898
+83	\N	error_login	Intento fallido de login con correo: ap@profesor.cl	2026-05-02 20:48:33.856207
+84	\N	error_login	Intento fallido de login con correo: lp@alumno.cl	2026-05-02 20:48:38.837731
+85	23	registro	Nuevo usuario registrado: Miguel Angel Perez Cisternas	2026-05-02 20:52:52.479202
+86	23	registro_alumno_pendiente	Docente agregó alumno pendiente Emilia Isidora Robles Pino al curso 3° Básico B	2026-05-02 20:54:45.695726
+87	23	registro_alumno_pendiente	Docente agregó alumno pendiente Emilia Isidora Robles Pino al curso 3° Básico B	2026-05-02 20:55:23.03132
+88	24	registro	Nuevo usuario registrado: Emilia Isidora Robles Pino	2026-05-02 20:56:00.429517
+89	23	creacion_lectura_curso	Docente creó la lectura "Las aventuras de Pinocho" y la asignó al curso 3° Básico B	2026-05-02 20:58:34.285823
+90	23	actualizacion_lectura	Docente actualizó la lectura "Las aventuras de Pinocho"	2026-05-02 21:15:43.290737
+91	23	actualizacion_lectura	Docente actualizó la lectura "Las aventuras de Pinocho"	2026-05-02 21:15:53.26901
+92	23	eliminacion_lectura	Docente eliminó la lectura "Las aventuras de Pinocho"	2026-05-02 21:16:06.923717
+93	23	creacion_lectura_curso	Docente creó la lectura "Las aventuras de Pinocho" y la asignó al curso 3° Básico B	2026-05-02 21:16:30.808431
+94	23	creacion_lectura_curso	Docente creó la lectura "Las aventuras de Pinocho" y la asignó al curso 3° Básico B	2026-05-02 21:17:07.635259
+95	23	eliminacion_lectura	Docente eliminó la lectura "Las aventuras de Pinocho"	2026-05-02 21:23:58.610493
+\.
+
+
+--
+-- TOC entry 5122 (class 0 OID 16514)
+-- Dependencies: 230
+-- Data for Name: intentos; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.intentos (id, alumno_id, lectura_id, puntaje, aprobado, duracion_seg, creado_en, cuestionario_id) FROM stdin;
+18	24	6	66.67	t	\N	2026-05-02 21:32:47.781849	\N
+19	24	6	0.00	f	\N	2026-05-02 21:33:14.460268	\N
+\.
+
+
+--
+-- TOC entry 5114 (class 0 OID 16446)
+-- Dependencies: 222
+-- Data for Name: lecturas; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.lecturas (id, titulo, autor, nivel_dificultad, contenido, creado_por, creado_en, categoria) FROM stdin;
+1	El Principito	Antoine de Saint-Exupéry	bajo	Texto de prueba...	\N	2026-03-28 16:47:06.483564	\N
+6	Las aventuras de Pinocho	Carlo Collodi (Escritor), Enrico Mazzanti (Ilustrador), José Sánchez López (Traductor)	Fácil	Había una vez un humilde carpintero llamado Geppetto, quien vivía solo en una pequeña casa llena de herramientas y trozos de madera. Aunque trabajaba duro todos los días, en su corazón sentía una gran soledad, ya que siempre había soñado con tener un hijo que le hiciera compañía. Un día, mientras observaba un trozo de madera muy especial, decidió tallar un muñeco con forma de niño. Con mucho cuidado y cariño, fue dando forma a su cabeza, brazos y piernas, y lo llamó Pinocho.\n\nEsa noche, cuando Geppetto se quedó dormido, apareció el Hada Azul, quien al ver el amor que había puesto en su creación, decidió darle vida al muñeco. Así, Pinocho comenzó a moverse y a hablar como si fuera un niño real. El hada le explicó que, si quería convertirse en un niño de verdad, debía demostrar que podía ser valiente, honesto y generoso.\n\nAl día siguiente, Geppetto se llenó de alegría al ver a Pinocho con vida. Decidió enviarlo a la escuela para que aprendiera a leer y escribir, pero Pinocho, curioso e impulsivo, pronto comenzó a desviarse del camino. En su primer día, fue engañado por el Zorro y el Gato, dos personajes astutos que lo convencieron de que podía hacerse rico plantando monedas en un campo mágico. Pinocho, creyendo en sus mentiras, terminó perdiendo todo su dinero.\n\nEn su camino también conoció al Grillo Parlante, quien trataba de aconsejarlo y guiarlo para que tomara buenas decisiones. Sin embargo, muchas veces Pinocho no escuchaba y terminaba metiéndose en problemas. Cada vez que decía una mentira, su nariz crecía, lo que lo dejaba en evidencia y le enseñaba que la verdad siempre es el mejor camino.\n\nA lo largo de sus aventuras, Pinocho vivió momentos difíciles. Fue capturado por titiriteros, convertido en burro en la Isla de los Juegos por no querer estudiar, y enfrentó múltiples peligros debido a su desobediencia. Cada experiencia le dejaba una enseñanza importante, aunque muchas veces le costaba aprenderla.\n\nUno de los momentos más importantes ocurrió cuando Pinocho decidió buscar a Geppetto, quien había salido al mar para encontrarlo. Durante la búsqueda, Pinocho fue tragado por una enorme ballena, y dentro de ella encontró a su padre. Juntos lograron escapar gracias a la valentía de Pinocho, quien finalmente comenzó a actuar con responsabilidad y amor.\n\nDespués de todo lo vivido, Pinocho comprendió la importancia de ser honesto, obediente y generoso. Trabajó duro para ayudar a Geppetto, cuidó de él y demostró que había cambiado de verdad. Al ver su transformación, el Hada Azul decidió cumplir su promesa y lo convirtió en un niño real.\n\nDesde ese día, Pinocho dejó de ser un muñeco de madera y pasó a ser un niño de verdad, viviendo feliz junto a Geppetto. Ambos aprendieron que el amor, la honestidad y el esfuerzo son los valores más importantes en la vida, y que siempre es posible cambiar si uno realmente lo desea.	23	2026-05-02 21:17:07.635259	Cuento / Literatura infantil
+\.
+
+
+--
+-- TOC entry 5112 (class 0 OID 16425)
+-- Dependencies: 220
+-- Data for Name: matriculas; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.matriculas (id, alumno_id, curso_id, fecha_matricula, estado) FROM stdin;
+6	24	8	2026-05-02	activo
+\.
+
+
+--
+-- TOC entry 5120 (class 0 OID 16499)
+-- Dependencies: 228
+-- Data for Name: opciones; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.opciones (id, pregunta_id, texto, es_correcta) FROM stdin;
+1	1	De un viaje espacial	f
+2	1	De un principito que explora mundos	t
+3	2	El Principito	t
+4	2	Un robot	f
+21	7	Que siempre debía hacer bromas	f
+22	7	Que la honestidad y la responsabilidad son importantes	f
+23	7	Que no debía volver a hablar con nadie	t
+24	7	Que era mejor seguir mintiendo	f
+25	8	Maestro Cereza	f
+26	8	Gepetto	t
+27	8	El Grillo Parlante	f
+28	8	El Hada Azul	f
+29	9	Le crece	t
+30	9	Se vuelve roja	f
+31	9	Se acorta	f
+32	9	Desaparece	f
+\.
+
+
+--
+-- TOC entry 5118 (class 0 OID 16484)
+-- Dependencies: 226
+-- Data for Name: preguntas; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.preguntas (id, lectura_id, enunciado, tipo, orden_pregunta, cuestionario_id) FROM stdin;
+1	1	¿De qué trata la lectura?	unica	1	\N
+2	1	¿Quién es el personaje principal?	unica	2	\N
+7	6	¿Qué aprendió Pinocho al final de sus aventuras?	opcion_multiple	1	4
+8	6	¿Quién creó a Pinocho?	opcion_multiple	2	4
+9	6	¿Qué le ocurre a la nariz de Pinocho cuando miente?	opcion_multiple	3	4
+\.
+
+
+--
+-- TOC entry 5126 (class 0 OID 16556)
+-- Dependencies: 234
+-- Data for Name: progreso_lectura; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.progreso_lectura (id, alumno_id, lectura_id, porcentaje_avance, ultima_pagina, actualizado_en) FROM stdin;
+3	24	6	100	1	2026-05-02 21:50:05.892119
+\.
+
+
+--
+-- TOC entry 5130 (class 0 OID 16589)
+-- Dependencies: 238
+-- Data for Name: puntos; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.puntos (id, alumno_id, motivo, delta, creado_en) FROM stdin;
+14	24	Aprobó evaluación de lectura 6	20	2026-05-02 21:32:47.781849
+\.
+
+
+--
+-- TOC entry 5128 (class 0 OID 16579)
+-- Dependencies: 236
+-- Data for Name: recompensas; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.recompensas (id, nombre, descripcion, puntos_necesarios) FROM stdin;
+\.
+
+
+--
+-- TOC entry 5124 (class 0 OID 16534)
+-- Dependencies: 232
+-- Data for Name: respuestas; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.respuestas (id, intento_id, pregunta_id, opcion_id, correcta) FROM stdin;
+31	18	7	22	f
+32	18	8	26	t
+33	18	9	29	t
+34	19	7	21	f
+35	19	8	28	f
+36	19	9	30	f
+\.
+
+
+--
+-- TOC entry 5146 (class 0 OID 16725)
+-- Dependencies: 254
+-- Data for Name: respuestas_alumno; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.respuestas_alumno (id, alumno_id, pregunta_id, alternativa_id, es_correcta, respondido_en) FROM stdin;
+\.
+
+
+--
+-- TOC entry 5108 (class 0 OID 16400)
+-- Dependencies: 216
+-- Data for Name: usuarios; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.usuarios (id, nombre, apellido, correo, password, rol, creado_en, activo, verification_token, asignatura, curso, es_profesor_jefe) FROM stdin;
+8	Administrador	Sistema	admin@cazalibros.com	$2b$10$cOmACqeC2A/pj51UajWwDOH0PjQAvUXLcAECE1urExyXHY/eQLnk6	admin	2026-03-28 23:14:03.043765	f	\N	\N	\N	f
+23	Miguel Angel	Perez Cisternas	m.perez@cazalibros.profesor.cl	$2b$10$t0IxeZhCqmDhlrmRZSXgF./HtdjKOZoERXH5b5AVkKyUXIKWUuG/2	docente	2026-05-02 20:52:52.470143	f	\N	Lenguaje y Comunicación	3° Básico B	t
+24	Emilia Isidora	Robles Pino	e.robles@cazalibros.alumno.cl	$2b$10$m/jb/IG./iOEfmhoI.J8y.gQO9s4ytt/SrKzToQLIftIISPlLvP1K	alumno	2026-05-02 20:56:00.42031	f	\N	\N	\N	f
+\.
+
+
+--
+-- TOC entry 5172 (class 0 OID 0)
+-- Dependencies: 249
+-- Name: alternativas_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.alternativas_id_seq', 1, false);
+
+
+--
+-- TOC entry 5173 (class 0 OID 0)
+-- Dependencies: 243
+-- Name: alumnos_pendientes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.alumnos_pendientes_id_seq', 10, true);
+
+
+--
+-- TOC entry 5174 (class 0 OID 0)
+-- Dependencies: 223
+-- Name: asignaciones_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.asignaciones_id_seq', 1, true);
+
+
+--
+-- TOC entry 5175 (class 0 OID 0)
+-- Dependencies: 245
+-- Name: asignaciones_lectura_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.asignaciones_lectura_id_seq', 7, true);
+
+
+--
+-- TOC entry 5176 (class 0 OID 0)
+-- Dependencies: 239
+-- Name: canjes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.canjes_id_seq', 1, false);
+
+
+--
+-- TOC entry 5177 (class 0 OID 0)
+-- Dependencies: 251
+-- Name: cuestionarios_asignados_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.cuestionarios_asignados_id_seq', 3, true);
+
+
+--
+-- TOC entry 5178 (class 0 OID 0)
+-- Dependencies: 247
+-- Name: cuestionarios_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.cuestionarios_id_seq', 4, true);
+
+
+--
+-- TOC entry 5179 (class 0 OID 0)
+-- Dependencies: 217
+-- Name: cursos_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.cursos_id_seq', 8, true);
+
+
+--
+-- TOC entry 5180 (class 0 OID 0)
+-- Dependencies: 241
+-- Name: eventos_log_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.eventos_log_id_seq', 95, true);
+
+
+--
+-- TOC entry 5181 (class 0 OID 0)
+-- Dependencies: 229
+-- Name: intentos_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.intentos_id_seq', 19, true);
+
+
+--
+-- TOC entry 5182 (class 0 OID 0)
+-- Dependencies: 221
+-- Name: lecturas_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.lecturas_id_seq', 6, true);
+
+
+--
+-- TOC entry 5183 (class 0 OID 0)
+-- Dependencies: 219
+-- Name: matriculas_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.matriculas_id_seq', 6, true);
+
+
+--
+-- TOC entry 5184 (class 0 OID 0)
+-- Dependencies: 227
+-- Name: opciones_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.opciones_id_seq', 32, true);
+
+
+--
+-- TOC entry 5185 (class 0 OID 0)
+-- Dependencies: 225
+-- Name: preguntas_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.preguntas_id_seq', 9, true);
+
+
+--
+-- TOC entry 5186 (class 0 OID 0)
+-- Dependencies: 233
+-- Name: progreso_lectura_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.progreso_lectura_id_seq', 3, true);
+
+
+--
+-- TOC entry 5187 (class 0 OID 0)
+-- Dependencies: 237
+-- Name: puntos_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.puntos_id_seq', 14, true);
+
+
+--
+-- TOC entry 5188 (class 0 OID 0)
+-- Dependencies: 235
+-- Name: recompensas_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.recompensas_id_seq', 1, false);
+
+
+--
+-- TOC entry 5189 (class 0 OID 0)
+-- Dependencies: 253
+-- Name: respuestas_alumno_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.respuestas_alumno_id_seq', 1, false);
+
+
+--
+-- TOC entry 5190 (class 0 OID 0)
+-- Dependencies: 231
+-- Name: respuestas_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.respuestas_id_seq', 36, true);
+
+
+--
+-- TOC entry 5191 (class 0 OID 0)
+-- Dependencies: 215
+-- Name: usuarios_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.usuarios_id_seq', 24, true);
+
+
+--
+-- TOC entry 4930 (class 2606 OID 16703)
+-- Name: alternativas alternativas_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.alternativas
+    ADD CONSTRAINT alternativas_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 4918 (class 2606 OID 16648)
+-- Name: alumnos_pendientes alumnos_pendientes_correo_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.alumnos_pendientes
+    ADD CONSTRAINT alumnos_pendientes_correo_key UNIQUE (correo);
+
+
+--
+-- TOC entry 4920 (class 2606 OID 16655)
+-- Name: alumnos_pendientes alumnos_pendientes_correo_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.alumnos_pendientes
+    ADD CONSTRAINT alumnos_pendientes_correo_unique UNIQUE (correo);
+
+
+--
+-- TOC entry 4922 (class 2606 OID 16646)
+-- Name: alumnos_pendientes alumnos_pendientes_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.alumnos_pendientes
+    ADD CONSTRAINT alumnos_pendientes_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 4924 (class 2606 OID 16664)
+-- Name: asignaciones_lectura asignaciones_lectura_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.asignaciones_lectura
+    ADD CONSTRAINT asignaciones_lectura_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 4896 (class 2606 OID 16467)
+-- Name: asignaciones asignaciones_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.asignaciones
+    ADD CONSTRAINT asignaciones_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 4914 (class 2606 OID 16608)
+-- Name: canjes canjes_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.canjes
+    ADD CONSTRAINT canjes_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 4932 (class 2606 OID 16716)
+-- Name: cuestionarios_asignados cuestionarios_asignados_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.cuestionarios_asignados
+    ADD CONSTRAINT cuestionarios_asignados_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 4928 (class 2606 OID 16693)
+-- Name: cuestionarios cuestionarios_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.cuestionarios
+    ADD CONSTRAINT cuestionarios_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 4888 (class 2606 OID 16418)
+-- Name: cursos cursos_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.cursos
+    ADD CONSTRAINT cursos_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 4916 (class 2606 OID 16628)
+-- Name: eventos_log eventos_log_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.eventos_log
+    ADD CONSTRAINT eventos_log_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 4902 (class 2606 OID 16522)
+-- Name: intentos intentos_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.intentos
+    ADD CONSTRAINT intentos_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 4894 (class 2606 OID 16454)
+-- Name: lecturas lecturas_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.lecturas
+    ADD CONSTRAINT lecturas_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 4890 (class 2606 OID 16434)
+-- Name: matriculas matriculas_alumno_id_curso_id_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.matriculas
+    ADD CONSTRAINT matriculas_alumno_id_curso_id_key UNIQUE (alumno_id, curso_id);
+
+
+--
+-- TOC entry 4892 (class 2606 OID 16432)
+-- Name: matriculas matriculas_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.matriculas
+    ADD CONSTRAINT matriculas_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 4900 (class 2606 OID 16507)
+-- Name: opciones opciones_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.opciones
+    ADD CONSTRAINT opciones_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 4898 (class 2606 OID 16492)
+-- Name: preguntas preguntas_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.preguntas
+    ADD CONSTRAINT preguntas_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 4906 (class 2606 OID 16567)
+-- Name: progreso_lectura progreso_lectura_alumno_id_lectura_id_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.progreso_lectura
+    ADD CONSTRAINT progreso_lectura_alumno_id_lectura_id_key UNIQUE (alumno_id, lectura_id);
+
+
+--
+-- TOC entry 4908 (class 2606 OID 16565)
+-- Name: progreso_lectura progreso_lectura_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.progreso_lectura
+    ADD CONSTRAINT progreso_lectura_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 4912 (class 2606 OID 16595)
+-- Name: puntos puntos_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.puntos
+    ADD CONSTRAINT puntos_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 4910 (class 2606 OID 16587)
+-- Name: recompensas recompensas_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.recompensas
+    ADD CONSTRAINT recompensas_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 4935 (class 2606 OID 16731)
+-- Name: respuestas_alumno respuestas_alumno_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.respuestas_alumno
+    ADD CONSTRAINT respuestas_alumno_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 4904 (class 2606 OID 16539)
+-- Name: respuestas respuestas_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.respuestas
+    ADD CONSTRAINT respuestas_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 4926 (class 2606 OID 16681)
+-- Name: asignaciones_lectura unique_asignacion_lectura; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.asignaciones_lectura
+    ADD CONSTRAINT unique_asignacion_lectura UNIQUE (lectura_id, alumno_id, curso_id);
+
+
+--
+-- TOC entry 4884 (class 2606 OID 16411)
+-- Name: usuarios usuarios_correo_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.usuarios
+    ADD CONSTRAINT usuarios_correo_key UNIQUE (correo);
+
+
+--
+-- TOC entry 4886 (class 2606 OID 16409)
+-- Name: usuarios usuarios_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.usuarios
+    ADD CONSTRAINT usuarios_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 4933 (class 1259 OID 16733)
+-- Name: uq_cuestionario_asignado_activo; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX uq_cuestionario_asignado_activo ON public.cuestionarios_asignados USING btree (cuestionario_id, curso_id, activo) WHERE (activo = true);
+
+
+--
+-- TOC entry 4961 (class 2606 OID 16704)
+-- Name: alternativas alternativas_pregunta_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.alternativas
+    ADD CONSTRAINT alternativas_pregunta_id_fkey FOREIGN KEY (pregunta_id) REFERENCES public.preguntas(id) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 4956 (class 2606 OID 16649)
+-- Name: alumnos_pendientes alumnos_pendientes_curso_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.alumnos_pendientes
+    ADD CONSTRAINT alumnos_pendientes_curso_id_fkey FOREIGN KEY (curso_id) REFERENCES public.cursos(id) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 4940 (class 2606 OID 16478)
+-- Name: asignaciones asignaciones_alumno_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.asignaciones
+    ADD CONSTRAINT asignaciones_alumno_id_fkey FOREIGN KEY (alumno_id) REFERENCES public.usuarios(id) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 4941 (class 2606 OID 16473)
+-- Name: asignaciones asignaciones_curso_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.asignaciones
+    ADD CONSTRAINT asignaciones_curso_id_fkey FOREIGN KEY (curso_id) REFERENCES public.cursos(id) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 4957 (class 2606 OID 16670)
+-- Name: asignaciones_lectura asignaciones_lectura_alumno_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.asignaciones_lectura
+    ADD CONSTRAINT asignaciones_lectura_alumno_id_fkey FOREIGN KEY (alumno_id) REFERENCES public.usuarios(id) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 4958 (class 2606 OID 16675)
+-- Name: asignaciones_lectura asignaciones_lectura_curso_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.asignaciones_lectura
+    ADD CONSTRAINT asignaciones_lectura_curso_id_fkey FOREIGN KEY (curso_id) REFERENCES public.cursos(id) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 4942 (class 2606 OID 16468)
+-- Name: asignaciones asignaciones_lectura_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.asignaciones
+    ADD CONSTRAINT asignaciones_lectura_id_fkey FOREIGN KEY (lectura_id) REFERENCES public.lecturas(id) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 4959 (class 2606 OID 16665)
+-- Name: asignaciones_lectura asignaciones_lectura_lectura_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.asignaciones_lectura
+    ADD CONSTRAINT asignaciones_lectura_lectura_id_fkey FOREIGN KEY (lectura_id) REFERENCES public.lecturas(id) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 4953 (class 2606 OID 16609)
+-- Name: canjes canjes_alumno_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.canjes
+    ADD CONSTRAINT canjes_alumno_id_fkey FOREIGN KEY (alumno_id) REFERENCES public.usuarios(id) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 4954 (class 2606 OID 16614)
+-- Name: canjes canjes_recompensa_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.canjes
+    ADD CONSTRAINT canjes_recompensa_id_fkey FOREIGN KEY (recompensa_id) REFERENCES public.recompensas(id) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 4962 (class 2606 OID 16717)
+-- Name: cuestionarios_asignados cuestionarios_asignados_cuestionario_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.cuestionarios_asignados
+    ADD CONSTRAINT cuestionarios_asignados_cuestionario_id_fkey FOREIGN KEY (cuestionario_id) REFERENCES public.cuestionarios(id) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 4963 (class 2606 OID 16740)
+-- Name: cuestionarios_asignados cuestionarios_asignados_enviado_por_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.cuestionarios_asignados
+    ADD CONSTRAINT cuestionarios_asignados_enviado_por_fkey FOREIGN KEY (enviado_por) REFERENCES public.usuarios(id);
+
+
+--
+-- TOC entry 4960 (class 2606 OID 16735)
+-- Name: cuestionarios cuestionarios_curso_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.cuestionarios
+    ADD CONSTRAINT cuestionarios_curso_id_fkey FOREIGN KEY (curso_id) REFERENCES public.cursos(id);
+
+
+--
+-- TOC entry 4936 (class 2606 OID 16419)
+-- Name: cursos cursos_docente_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.cursos
+    ADD CONSTRAINT cursos_docente_id_fkey FOREIGN KEY (docente_id) REFERENCES public.usuarios(id) ON DELETE SET NULL;
+
+
+--
+-- TOC entry 4955 (class 2606 OID 16629)
+-- Name: eventos_log eventos_log_usuario_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.eventos_log
+    ADD CONSTRAINT eventos_log_usuario_id_fkey FOREIGN KEY (usuario_id) REFERENCES public.usuarios(id) ON DELETE SET NULL;
+
+
+--
+-- TOC entry 4945 (class 2606 OID 16523)
+-- Name: intentos intentos_alumno_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.intentos
+    ADD CONSTRAINT intentos_alumno_id_fkey FOREIGN KEY (alumno_id) REFERENCES public.usuarios(id) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 4946 (class 2606 OID 16528)
+-- Name: intentos intentos_lectura_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.intentos
+    ADD CONSTRAINT intentos_lectura_id_fkey FOREIGN KEY (lectura_id) REFERENCES public.lecturas(id) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 4939 (class 2606 OID 16455)
+-- Name: lecturas lecturas_creado_por_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.lecturas
+    ADD CONSTRAINT lecturas_creado_por_fkey FOREIGN KEY (creado_por) REFERENCES public.usuarios(id) ON DELETE SET NULL;
+
+
+--
+-- TOC entry 4937 (class 2606 OID 16435)
+-- Name: matriculas matriculas_alumno_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.matriculas
+    ADD CONSTRAINT matriculas_alumno_id_fkey FOREIGN KEY (alumno_id) REFERENCES public.usuarios(id) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 4938 (class 2606 OID 16440)
+-- Name: matriculas matriculas_curso_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.matriculas
+    ADD CONSTRAINT matriculas_curso_id_fkey FOREIGN KEY (curso_id) REFERENCES public.cursos(id) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 4944 (class 2606 OID 16508)
+-- Name: opciones opciones_pregunta_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.opciones
+    ADD CONSTRAINT opciones_pregunta_id_fkey FOREIGN KEY (pregunta_id) REFERENCES public.preguntas(id) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 4943 (class 2606 OID 16493)
+-- Name: preguntas preguntas_lectura_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.preguntas
+    ADD CONSTRAINT preguntas_lectura_id_fkey FOREIGN KEY (lectura_id) REFERENCES public.lecturas(id) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 4950 (class 2606 OID 16568)
+-- Name: progreso_lectura progreso_lectura_alumno_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.progreso_lectura
+    ADD CONSTRAINT progreso_lectura_alumno_id_fkey FOREIGN KEY (alumno_id) REFERENCES public.usuarios(id) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 4951 (class 2606 OID 16573)
+-- Name: progreso_lectura progreso_lectura_lectura_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.progreso_lectura
+    ADD CONSTRAINT progreso_lectura_lectura_id_fkey FOREIGN KEY (lectura_id) REFERENCES public.lecturas(id) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 4952 (class 2606 OID 16596)
+-- Name: puntos puntos_alumno_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.puntos
+    ADD CONSTRAINT puntos_alumno_id_fkey FOREIGN KEY (alumno_id) REFERENCES public.usuarios(id) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 4947 (class 2606 OID 16540)
+-- Name: respuestas respuestas_intento_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.respuestas
+    ADD CONSTRAINT respuestas_intento_id_fkey FOREIGN KEY (intento_id) REFERENCES public.intentos(id) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 4948 (class 2606 OID 16550)
+-- Name: respuestas respuestas_opcion_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.respuestas
+    ADD CONSTRAINT respuestas_opcion_id_fkey FOREIGN KEY (opcion_id) REFERENCES public.opciones(id) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 4949 (class 2606 OID 16545)
+-- Name: respuestas respuestas_pregunta_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.respuestas
+    ADD CONSTRAINT respuestas_pregunta_id_fkey FOREIGN KEY (pregunta_id) REFERENCES public.preguntas(id) ON DELETE CASCADE;
+
+
+-- Completed on 2026-05-03 00:51:13
+
+--
+-- PostgreSQL database dump complete
+--
+
+\unrestrict P3XZSZjNbIboHNXWL11ecfdFga6J6lxEHzOoCcVM5nUH0dsm3ZFbWHhE72jZ2SB
+
