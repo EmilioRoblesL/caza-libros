@@ -1488,7 +1488,7 @@ async function desactivarCuestionario(cuestionarioId) {
 ========================= */
 function logout() {
   localStorage.removeItem("usuario");
-  window.location.href = "login.html";
+  window.location.href = "index.html";
 }
 
 /* =========================
