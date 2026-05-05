@@ -86,8 +86,21 @@ function renderizarUsuarios(listaUsuarios) {
       <td>${u.rol === "alumno" ? (u.curso_matriculado || "Sin curso") : (u.curso || "-")}</td>
       <td>${u.es_profesor_jefe ? "Sí" : "No"}</td>
       <td>
-        <button type="button" class="btn-table" onclick="editarUsuario(${u.id})">Editar</button>
-        <button type="button" class="btn-table btn-danger" onclick="eliminarUsuario(${u.id})">Eliminar</button>
+      <button type="button" class="btn-table" onclick="editarUsuario(${u.id})">
+          Editar
+        </button>
+
+        ${
+          u.rol === "alumno"
+            ? `<button type="button" class="btn-table" style="background:#f59e0b; color:white;" onclick="resetearAlumno(${u.id})">
+                Resetear
+              </button>`
+            : ""
+        }
+
+        <button type="button" class="btn-table btn-danger" onclick="eliminarUsuario(${u.id})">
+          Eliminar
+        </button>
       </td>
     `;
 
@@ -621,6 +634,34 @@ function mostrarSeccion(seccion, element) {
   }
 }
 
+async function resetearAlumno(id) {
+  const confirmar = confirm("¿Seguro que quieres borrar TODO el progreso, puntos y evaluaciones de este alumno?");
+  if (!confirmar) return;
+
+  try {
+    const res = await fetch(`http://localhost:3000/api/admin/usuarios/${id}/reset`, {
+      method: "DELETE"
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "No se pudo resetear el alumno");
+      return;
+    }
+
+    alert("Alumno reseteado correctamente");
+
+    await cargarUsuarios();
+    await cargarResumenSistema();
+    await cargarAuditoria();
+    await cargarResumenReportes();
+  } catch (error) {
+    console.error(error);
+    alert("Error al resetear alumno");
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const nombreAdmin = document.getElementById("nombreAdmin");
 
@@ -681,6 +722,5 @@ document.addEventListener("DOMContentLoaded", () => {
   cargarAuditoria();
   cargarResumenReportes();
   
-
   mostrarSeccion("panel", document.querySelector(".menu-link.active"));
 });

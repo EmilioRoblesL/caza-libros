@@ -14,6 +14,10 @@ const API_PROGRESO = "http://localhost:3000/api/progreso";
 let lecturaSeleccionada = null;
 let timeoutGuardado = null;
 let ultimoPorcentaje = -1;
+let cuestionarioActual = null;
+let preguntasActuales = [];
+let preguntaIndiceActual = 0;
+let respuestasAlumno = [];
 
 /* =========================
    NAVEGACIÓN
@@ -66,7 +70,6 @@ async function cargarLecturasAsignadas() {
 
     const lista = document.getElementById("listaLecturas");
     const cantidad = document.getElementById("cantidadLecturas");
-    const cursoInfo = document.getElementById("cursoAlumnoInfo");
 
     if (!lista) return;
     lista.innerHTML = "";
@@ -76,24 +79,37 @@ async function cargarLecturasAsignadas() {
       : [];
 
     if (cantidad) cantidad.textContent = lecturas.length;
-        if (!lecturas.length) {
-      lista.innerHTML = "<li>No tienes lecturas asignadas</li>";
+
+    if (!lecturas.length) {
+      lista.innerHTML = `
+        <div class="estado-vacio">
+          <h3> No tienes lecturas asignadas</h3>
+          <p>Cuando tu profesor asigne una lectura, aparecerá aquí.</p>
+        </div>
+      `;
       return;
     }
 
-    const primera = lecturas[0];
-    if (cursoInfo) {
-      cursoInfo.textContent =
-        `Curso: ${primera.curso_nombre || "Sin curso"} | Profesor jefe: ${primera.profesor_nombre || ""} ${primera.profesor_apellido || ""}`;
-    }
-
     lecturas.forEach((l) => {
-      const li = document.createElement("li");
-      const btn = document.createElement("button");
+      const card = document.createElement("div");
+      card.className = "card-lectura";
 
-      btn.textContent = `${l.titulo}${l.autor ? " - " + l.autor : ""}`;
+      card.innerHTML = `
+        <div class="lectura-card-info">
+          <h3> ${l.titulo}</h3>
+          <p>${l.autor ? "Autor: " + l.autor : "Autor no registrado"}</p>
+        </div>
 
-      btn.onclick = () =>
+        <div class="lectura-card-acciones">
+          <button type="button" class="btn-leer-card">Leer lectura</button>
+          <button type="button" class="btn-evaluar-card">Responder evaluación</button>
+        </div>
+      `;
+
+      const btnLeer = card.querySelector(".btn-leer-card");
+      const btnEvaluar = card.querySelector(".btn-evaluar-card");
+
+      btnLeer.onclick = () => {
         seleccionarLectura({
           id: l.lectura_id,
           titulo: l.titulo,
@@ -104,8 +120,25 @@ async function cargarLecturasAsignadas() {
           profesor_apellido: l.profesor_apellido
         });
 
-      li.appendChild(btn);
-      lista.appendChild(li);
+        mostrarSeccionAlumno("lector", document.querySelectorAll(".menu-link")[2]);
+      };
+
+      btnEvaluar.onclick = () => {
+        seleccionarLectura({
+          id: l.lectura_id,
+          titulo: l.titulo,
+          autor: l.autor,
+          contenido: l.contenido,
+          curso_nombre: l.curso_nombre,
+          profesor_nombre: l.profesor_nombre,
+          profesor_apellido: l.profesor_apellido
+        });
+
+        mostrarSeccionAlumno("progreso", document.querySelectorAll(".menu-link")[3]);
+        cargarCuestionariosAlumno();
+      };
+
+      lista.appendChild(card);
     });
   } catch (err) {
     console.error(err);
@@ -114,20 +147,32 @@ async function cargarLecturasAsignadas() {
 }
 
 /* =========================
+    BARRA DE LECTURA
+========================= */
+
+function actualizarBarraLectura(porcentaje) {
+  const texto = document.getElementById("porcentajeLecturaTexto");
+  const barra = document.getElementById("barraProgresoLectura");
+
+  const valor = Math.max(0, Math.min(100, Number(porcentaje) || 0));
+
+  if (texto) texto.textContent = `${valor}%`;
+  if (barra) barra.style.width = `${valor}%`;
+}
+
+/* =========================
    SELECCIONAR LECTURA
 ========================= */
 function seleccionarLectura(lectura) {
   lecturaSeleccionada = lectura;
-  ultimoPorcentaje = -1;
+  ultimoPorcentaje = 0;
 
   const elLecturaTexto = document.getElementById("lecturaSeleccionadaTexto");
   const elLecturaProgreso = document.getElementById("lecturaSeleccionadaProgreso");
   const elTitulo = document.getElementById("tituloLecturaAbierta");
   const elMeta = document.getElementById("metaLecturaAbierta");
   const elContenido = document.getElementById("contenidoLecturaAbierta");
-  const elCurso = document.getElementById("cursoAlumnoInfo");
   const wrapper = document.getElementById("contenidoLecturaWrapper");
-  const inputLector = document.getElementById("porcentajeProgresoLector");
 
   if (elLecturaTexto) {
     elLecturaTexto.textContent = `Lectura seleccionada: ${lectura.titulo}`;
@@ -140,9 +185,6 @@ function seleccionarLectura(lectura) {
   if (elTitulo) elTitulo.textContent = lectura.titulo || "Sin título";
   if (elMeta) elMeta.textContent = `Autor: ${lectura.autor || "-"}`;
   if (elContenido) elContenido.textContent = lectura.contenido || "Sin contenido";
-  if (elCurso) {
-    elCurso.textContent = `Curso: ${lectura.curso_nombre || "Sin curso"} | Profesor jefe: ${lectura.profesor_nombre || ""} ${lectura.profesor_apellido || ""}`;
-  }
 
   if (wrapper) {
     wrapper.scrollTop = 0;
@@ -150,9 +192,8 @@ function seleccionarLectura(lectura) {
     wrapper.addEventListener("scroll", onScrollLectura);
   }
 
-  if (inputLector) inputLector.value = 0;
-
   actualizarBarra(0);
+  cargarPerfilAlumno();
   cargarProgresoAlumno();
 
   const links = document.querySelectorAll(".menu-link");
@@ -185,13 +226,17 @@ function onScrollLectura() {
 function actualizarBarra(porcentaje) {
   const barra = document.getElementById("barraProgresoLectura");
   const texto = document.getElementById("porcentajeLecturaTexto");
-  const input = document.getElementById("porcentajeProgresoLector");
 
   const val = Math.max(0, Math.min(100, Math.round(porcentaje)));
 
   if (barra) barra.style.width = `${val}%`;
   if (texto) texto.textContent = `${val}%`;
-  if (input) input.value = val;
+
+  ultimoPorcentaje = val;
+}
+
+function actualizarBarraLectura(porcentaje) {
+  actualizarBarra(porcentaje);
 }
 
 /* =========================
@@ -283,22 +328,18 @@ async function guardarProgreso() {
 
 async function guardarProgresoDesdeLector() {
   if (!lecturaSeleccionada) {
-    alert("Selecciona una lectura");
+    alert("Selecciona una lectura primero");
     return;
   }
 
-  const input = document.getElementById("porcentajeProgresoLector");
-  const porcentaje = Number(input?.value);
-
-  if (Number.isNaN(porcentaje) || porcentaje < 0 || porcentaje > 100) {
-    alert("Porcentaje inválido");
-    return;
-  }
+  const porcentaje = Math.max(0, Math.min(100, Number(ultimoPorcentaje) || 100));
 
   try {
     const res = await fetch(API_PROGRESO, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify({
         alumno_id: usuario.id,
         lectura_id: lecturaSeleccionada.id,
@@ -311,14 +352,16 @@ async function guardarProgresoDesdeLector() {
       throw new Error(data.message || "No se pudo guardar el progreso");
     }
 
-    ultimoPorcentaje = Math.round(porcentaje);
-    actualizarBarra(porcentaje);
-    cargarProgresoAlumno();
+    await cargarProgresoAlumno();
+    await cargarCuestionariosAlumno();
 
-    alert("Guardado ✔");
+    alert("Progreso guardado correctamente");
+
+    const links = document.querySelectorAll(".menu-link");
+    mostrarSeccionAlumno("progreso", links[3] || null);
   } catch (e) {
     console.error(e);
-    alert("Error al guardar");
+    alert("Error al guardar progreso");
   }
 }
 
@@ -328,26 +371,41 @@ async function guardarProgresoDesdeLector() {
 async function cargarProgresoAlumno() {
   try {
     const res = await fetch(`${API_PROGRESO}/alumno/${usuario.id}`);
-    const data = await res.json();
+    const progresos = await res.json();
+
+    const resResultados = await fetch(`${API_RESULTADOS}/${usuario.id}`);
+    const resultados = await resResultados.json();
 
     const lista = document.getElementById("listaProgresoAlumno");
     if (!lista) return;
 
     lista.innerHTML = "";
 
-    if (!Array.isArray(data) || data.length === 0) {
+    if (!Array.isArray(progresos) || progresos.length === 0) {
       lista.innerHTML = "<li>No hay progreso guardado</li>";
       return;
     }
 
-    data.forEach((p) => {
+    progresos.forEach((p) => {
+      const resultado = Array.isArray(resultados)
+        ? resultados.find((r) => Number(r.lectura_id) === Number(p.lectura_id))
+        : null;
+
       const li = document.createElement("li");
-      li.textContent = `${p.titulo} - ${p.porcentaje_avance}%`;
+
+      li.innerHTML = `
+        <strong>${p.titulo}</strong> - leído al ${p.porcentaje_avance}% 
+        ${resultado 
+          ? `- Evaluación respondida: ${resultado.aprobado ? "20.00 puntos ✔" : "0 puntos ✘"}`
+          : `- Evaluación pendiente`
+        }
+      `;
+
       lista.appendChild(li);
     });
 
     if (lecturaSeleccionada) {
-      const progresoLectura = data.find(
+      const progresoLectura = progresos.find(
         (p) => Number(p.lectura_id) === Number(lecturaSeleccionada.id)
       );
 
@@ -355,9 +413,6 @@ async function cargarProgresoAlumno() {
         const porcentaje = Number(progresoLectura.porcentaje_avance || 0);
         ultimoPorcentaje = Math.round(porcentaje);
         actualizarBarra(porcentaje);
-
-        const inputLector = document.getElementById("porcentajeProgresoLector");
-        if (inputLector) inputLector.value = porcentaje;
 
         const inputManual = document.getElementById("porcentajeProgreso");
         if (inputManual) inputManual.value = porcentaje;
@@ -373,29 +428,49 @@ async function cargarProgresoAlumno() {
 ========================= */
 async function cargarResultados() {
   try {
-    const res = await fetch(`${API_RESULTADOS}/${usuario.id}`);
+    const res = await fetch(`http://localhost:3000/api/resultados/${usuario.id}`);
     const data = await res.json();
 
     const lista = document.getElementById("listaResultados");
-    const cantidad = document.getElementById("cantidadResultadosAlumno");
-
     if (!lista) return;
+
     lista.innerHTML = "";
 
-    if (cantidad) cantidad.textContent = Array.isArray(data) ? data.length : 0;
-
-    if (!Array.isArray(data) || !data.length) {
-      lista.innerHTML = "<li>No hay resultados</li>";
+    if (!data.length) {
+      lista.innerHTML = "<li>No tienes resultados aún.</li>";
       return;
     }
 
     data.forEach((r) => {
       const li = document.createElement("li");
-      li.textContent = `${r.titulo} - ${r.puntaje} pts - ${r.aprobado ? "✔" : "✘"}`;
+
+      const puntos = r.aprobado ? "20.00 puntos" : "0 puntos";
+      const estado = r.aprobado ? "Aprobado ✔" : "Reprobado ✘";
+
+      li.innerHTML = `
+        <div style="margin-bottom:6px;">
+          <strong>${r.titulo}</strong>
+        </div>
+        <div>
+          Puntaje obtenido: ${puntos}
+        </div>
+        <div>
+          Resultado: <strong>${estado}</strong>
+        </div>
+      `;
+
+      li.style.marginBottom = "12px";
+      li.style.padding = "10px";
+      li.style.background = "#f8faff";
+      li.style.border = "1px solid #dbe2f0";
+      li.style.borderRadius = "8px";
+
       lista.appendChild(li);
     });
-  } catch (e) {
-    console.error(e);
+
+  } catch (error) {
+    console.error(error);
+    alert("Error al cargar resultados");
   }
 }
 
@@ -480,28 +555,50 @@ async function cargarCuestionariosAlumno() {
     const res = await fetch(`http://localhost:3000/api/evaluaciones/alumno/${usuario.id}/cuestionarios`);
     const cuestionarios = await res.json();
 
-    const lista = document.getElementById("listaCuestionariosAlumno");
-    lista.innerHTML = "";
+    const resResultados = await fetch(`${API_RESULTADOS}/${usuario.id}`);
+    const resultados = await resResultados.json();
 
-    if (!cuestionarios.length) {
-      lista.innerHTML = "<li>No tienes evaluaciones asignadas</li>";
+    const lista = document.getElementById("listaCuestionariosAlumno");
+    const contenedor = document.getElementById("contenedorCuestionarioAlumno");
+
+    if (!lista) return;
+
+    lista.innerHTML = "";
+    if (contenedor) contenedor.innerHTML = "";
+
+    const lecturasRespondidas = Array.isArray(resultados)
+      ? resultados.map((r) => Number(r.lectura_id))
+      : [];
+
+    const cuestionariosPendientes = Array.isArray(cuestionarios)
+      ? cuestionarios.filter((c) => !lecturasRespondidas.includes(Number(c.lectura_id)))
+      : [];
+
+    if (!cuestionariosPendientes.length) {
+      lista.innerHTML = `
+        <li>
+          No tienes evaluaciones pendientes por responder.
+        </li>
+      `;
       return;
     }
 
-    cuestionarios.forEach(c => {
+    cuestionariosPendientes.forEach((c) => {
       const li = document.createElement("li");
+
       li.innerHTML = `
         <strong>${c.cuestionario_titulo}</strong><br>
         Lectura: ${c.lectura_titulo}<br>
-        <button onclick="abrirCuestionario(${c.cuestionario_id})">
+        <button type="button" onclick="abrirCuestionario(${c.cuestionario_id})">
           Responder cuestionario
         </button>
       `;
+
       lista.appendChild(li);
     });
 
   } catch (error) {
-    console.error(error);
+    console.error("Error al cargar cuestionarios:", error);
   }
 }
 
@@ -518,37 +615,17 @@ async function abrirCuestionario(id) {
       throw new Error(data.message || "No se pudo cargar el cuestionario");
     }
 
-    const cuestionario = data.cuestionario;
-    const preguntas = data.preguntas || [];
+    cuestionarioActual = data.cuestionario;
+    preguntasActuales = data.preguntas || [];
+    preguntaIndiceActual = 0;
+    respuestasAlumno = [];
 
-    const contenedor = document.getElementById("contenedorCuestionarioAlumno");
+    if (!preguntasActuales.length) {
+      alert("Este cuestionario no tiene preguntas.");
+      return;
+    }
 
-    contenedor.innerHTML = `
-      <h3>${cuestionario.titulo}</h3>
-      <form id="formResponder"></form>
-      <button type="button" onclick="enviarRespuestas(${cuestionario.id}, ${cuestionario.lectura_id})">
-        Enviar respuestas
-      </button>
-    `;
-
-    const form = document.getElementById("formResponder");
-
-    preguntas.forEach((p) => {
-      const div = document.createElement("div");
-      div.style.marginBottom = "20px";
-
-      div.innerHTML = `
-        <p><strong>${p.enunciado}</strong></p>
-        ${(p.opciones || []).map(op => `
-          <label>
-            <input type="radio" name="pregunta_${p.id}" value="${op.id}">
-            ${op.texto}
-          </label><br>
-        `).join("")}
-      `;
-
-      form.appendChild(div);
-    });
+    mostrarPreguntaActual();
 
   } catch (error) {
     console.error("Error al abrir cuestionario:", error);
@@ -557,26 +634,118 @@ async function abrirCuestionario(id) {
 }
 
 /* =========================
+mostrar pregunta actual y opciones para responder
+========================= */
+
+function mostrarPreguntaActual() {
+  const contenedor = document.getElementById("contenedorCuestionarioAlumno");
+  if (!contenedor) return;
+
+  const pregunta = preguntasActuales[preguntaIndiceActual];
+  const total = preguntasActuales.length;
+  const numero = preguntaIndiceActual + 1;
+  const progreso = Math.round((numero / total) * 100);
+
+  contenedor.innerHTML = `
+    <div class="quiz-layout">
+      <div class="quiz-card">
+        <h3>Lectura</h3>
+        <p>${lecturaSeleccionada?.contenido 
+          ? lecturaSeleccionada.contenido.substring(0, 220) + "..." 
+          : "Lectura seleccionada: " + (lecturaSeleccionada?.titulo || "Sin lectura")}
+        </p>
+      </div>
+
+      <div class="quiz-card">
+        <h3>Pregunta</h3>
+        <p class="quiz-pregunta">${pregunta.enunciado}</p>
+
+        <div class="quiz-opciones">
+          ${(pregunta.opciones || []).map((op) => `
+            <label class="quiz-opcion">
+              <input type="radio" name="pregunta_actual" value="${op.id}">
+              <span>${op.texto}</span>
+            </label>
+          `).join("")}
+        </div>
+      </div>
+
+      <div class="quiz-footer">
+        <div class="quiz-progress-wrap">
+          <span>Progreso:</span>
+          <div class="quiz-progress">
+            <div class="quiz-progress-fill" style="width:${progreso}%"></div>
+          </div>
+        </div>
+
+        ${
+          preguntaIndiceActual < total - 1
+            ? `<button type="button" class="quiz-btn-next" onclick="siguientePregunta()">Siguiente</button>`
+            : `<button type="button" class="quiz-btn-next" onclick="finalizarCuestionario()">Enviar</button>`
+        }
+      </div>
+    </div>
+  `;
+}
+
+function siguientePregunta() {
+  const seleccionada = document.querySelector('input[name="pregunta_actual"]:checked');
+
+  if (!seleccionada) {
+    alert("Debes seleccionar una alternativa antes de continuar.");
+    return;
+  }
+
+  const pregunta = preguntasActuales[preguntaIndiceActual];
+
+  respuestasAlumno[preguntaIndiceActual] = {
+    pregunta_id: pregunta.id,
+    opcion_id: Number(seleccionada.value)
+  };
+
+  preguntaIndiceActual++;
+  mostrarPreguntaActual();
+}
+
+function preguntaAnterior() {
+  if (preguntaIndiceActual > 0) {
+    preguntaIndiceActual--;
+    mostrarPreguntaActual();
+  }
+}
+
+async function finalizarCuestionario() {
+  const seleccionada = document.querySelector('input[name="pregunta_actual"]:checked');
+
+  if (!seleccionada) {
+    alert("Debes seleccionar una alternativa antes de enviar.");
+    return;
+  }
+
+  const pregunta = preguntasActuales[preguntaIndiceActual];
+
+  respuestasAlumno[preguntaIndiceActual] = {
+    pregunta_id: pregunta.id,
+    opcion_id: Number(seleccionada.value)
+  };
+
+  if (respuestasAlumno.length < preguntasActuales.length) {
+    alert("Debes responder todas las preguntas.");
+    return;
+  }
+
+  await enviarRespuestas(
+    cuestionarioActual.id,
+    cuestionarioActual.lectura_id,
+    respuestasAlumno
+  );
+}
+
+/* =========================
    cargar respuestas y enviar al backend
 ========================= */
-async function enviarRespuestas(cuestionarioId, lecturaId) {
+async function enviarRespuestas(cuestionarioId, lecturaId, respuestas) {
   try {
-    const inputs = document.querySelectorAll("#formResponder input:checked");
-
-    if (!inputs.length) {
-      alert("Debes responder al menos una pregunta");
-      return;
-    }
-
-    const respuestas = [];
-
-    inputs.forEach(i => {
-      const pregunta_id = parseInt(i.name.split("_")[1]);
-      const opcion_id = parseInt(i.value);
-
-      respuestas.push({ pregunta_id, opcion_id });
-    });
-
     const res = await fetch("http://localhost:3000/api/evaluaciones/responder", {
       method: "POST",
       headers: {
@@ -592,13 +761,23 @@ async function enviarRespuestas(cuestionarioId, lecturaId) {
     const data = await res.json();
 
     if (!res.ok) {
-      throw new Error(data.message);
+      alert(data.message || "No se pudo enviar la evaluación");
+      return;
     }
 
-    alert(`Puntaje: ${data.puntaje} - ${data.aprobado ? "Aprobado" : "Reprobado"}`);
+    alert(
+      `Evaluación enviada correctamente.\nPuntaje: ${data.puntaje} - ${data.aprobado ? "Aprobado" : "Reprobado"}\nPuntos obtenidos: ${data.puntos_ganados || 0}`
+    );
 
-    cargarResultados();
-    cargarPuntos();
+    const contenedor = document.getElementById("contenedorCuestionarioAlumno");
+    if (contenedor) contenedor.innerHTML = "";
+
+    await cargarCuestionariosAlumno();
+    await cargarResultados();
+    await cargarPuntos();
+    await cargarProgresoAlumno();
+
+    mostrarSeccionAlumno("resultados", document.querySelectorAll(".menu-link")[4]);
 
   } catch (error) {
     console.error(error);

@@ -58,8 +58,8 @@
         <section class="admin-panel">
           <h2>Resumen</h2>
           <p>
-            Aquí podrás revisar tus lecturas asignadas, leer el contenido, guardar tu progreso,
-            responder evaluaciones y ver tus puntos.
+            Aquí podrás revisar tus lecturas asignadas, leer el contenido,
+            guardar tu progreso, responder evaluaciones y ver tus puntos.
           </p>
         </section>
       </section>
@@ -67,9 +67,20 @@
       <!-- LECTURAS -->
       <section id="alumno-seccion-lecturas" class="admin-section-hidden">
         <section class="admin-panel">
-          <h2>Mis lecturas asignadas</h2>
-          <button type="button" onclick="cargarLecturasAsignadas()">Actualizar lecturas</button>
-          <ul id="listaLecturas" class="lista-alumno"></ul>
+          <div class="alumno-panel-header">
+            <div>
+              <h2>Mis lecturas asignadas</h2>
+              <p class="panel-descripcion">
+                Selecciona una lectura para comenzar. También puedes ir directamente a responder su evaluación.
+              </p>
+            </div>
+
+            <button type="button" class="btn-secondary" onclick="cargarLecturasAsignadas()">
+              Actualizar lista
+            </button>
+          </div>
+
+          <div id="listaLecturas" class="lecturas-grid"></div>
         </section>
       </section>
 
@@ -80,36 +91,30 @@
           <h3 id="tituloLecturaAbierta">Sin lectura seleccionada</h3>
           <p id="metaLecturaAbierta">Autor: -</p>
 
-          <!-- Barra de progreso -->
-          <div class="lector-progreso-box">
-            <div class="lector-progreso-header">
-              <span>Progreso de lectura</span>
-              <span id="porcentajeLecturaTexto">0%</span>
+          <div class="lector-progreso-card">
+            <div class="lector-progreso-info">
+              <div>
+                <strong>Avance de lectura</strong>
+                <p>Tu progreso se mostrará aquí mientras avanzas en la lectura.</p>
+              </div>
+              <span id="porcentajeLecturaTexto" class="lector-progreso-numero">0%</span>
             </div>
+
             <div class="lector-progreso-track">
               <div id="barraProgresoLectura" class="lector-progreso-fill"></div>
             </div>
           </div>
 
-          <!-- Contenedor con scroll -->
           <div id="contenidoLecturaWrapper" class="lector-wrapper">
             <div id="contenidoLecturaAbierta" class="lector-box">
               Selecciona una lectura en “Mis lecturas” para comenzar a leer.
             </div>
           </div>
 
-          <div class="form-admin" style="margin-top: 20px;">
-            <input
-              type="number"
-              id="porcentajeProgresoLector"
-              placeholder="Porcentaje de avance (0 a 100)"
-              min="0"
-              max="100"
-            />
-
-            <div class="btn-group-admin">
-              <button type="button" onclick="guardarProgresoDesdeLector()">Guardar progreso</button>
-            </div>
+          <div class="lector-acciones">
+            <button type="button" onclick="guardarProgresoDesdeLector()">
+              Guardar progreso de lectura
+            </button>
           </div>
         </section>
       </section>
@@ -118,7 +123,9 @@
       <section id="alumno-seccion-progreso" class="admin-section-hidden">
         <section class="admin-panel">
           <h2>Guardar progreso</h2>
-          <p id="lecturaSeleccionadaProgreso">Debes seleccionar una lectura en la sección "Mis lecturas".</p>
+          <p id="lecturaSeleccionadaProgreso">
+            Debes seleccionar una lectura en la sección "Mis lecturas".
+          </p>
 
           <div class="form-admin">
             <input
@@ -139,19 +146,34 @@
           <h2>Mi progreso guardado</h2>
           <ul id="listaProgresoAlumno" class="lista-alumno"></ul>
         </section>
-      </section>
-      <!-- RESULTADOS -->
-      <section id="alumno-seccion-resultados" class="admin-section-hidden">
+
         <section class="admin-panel">
-          <h2>Evaluaciones asignadas</h2>
-          <button type="button" onclick="cargarCuestionariosAlumno()">Actualizar evaluaciones</button>
+          <h2>Evaluaciones pendientes</h2>
+          <p class="panel-descripcion">
+            Aquí aparecerán los cuestionarios disponibles para responder una sola vez.
+          </p>
+
+          <button type="button" onclick="cargarCuestionariosAlumno()">
+            Actualizar evaluaciones
+          </button>
+
           <ul id="listaCuestionariosAlumno" class="lista-alumno"></ul>
           <div id="contenedorCuestionarioAlumno"></div>
         </section>
+      </section>
 
+      <!-- RESULTADOS -->
+      <section id="alumno-seccion-resultados" class="admin-section-hidden">
         <section class="admin-panel">
           <h2>Mis resultados</h2>
-          <button type="button" onclick="cargarResultados()">Actualizar resultados</button>
+          <p class="panel-descripcion">
+            Aquí podrás revisar tus evaluaciones respondidas y el puntaje obtenido.
+          </p>
+
+          <button type="button" onclick="cargarResultados()">
+            Actualizar resultados
+          </button>
+
           <ul id="listaResultados" class="lista-alumno"></ul>
         </section>
       </section>
@@ -160,7 +182,14 @@
       <section id="alumno-seccion-puntos" class="admin-section-hidden">
         <section class="admin-panel">
           <h2>Mis puntos</h2>
-          <button type="button" onclick="cargarPuntos()">Actualizar puntos</button>
+          <p class="panel-descripcion">
+            Aquí se muestran los puntos obtenidos por tus evaluaciones aprobadas.
+          </p>
+
+          <button type="button" onclick="cargarPuntos()">
+            Actualizar puntos
+          </button>
+
           <ul id="listaPuntos" class="lista-alumno"></ul>
           <p id="totalPuntos">Total puntos: 0</p>
         </section>

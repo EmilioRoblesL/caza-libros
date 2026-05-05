@@ -888,6 +888,55 @@ table td {
   }
 }
 
+.lecturas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.card-lectura {
+  background: white;
+  border-radius: 10px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  transition: 0.2s;
+}
+
+.card-lectura:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.card-lectura h3 {
+  margin-bottom: 5px;
+}
+
+.card-lectura p {
+  font-size: 14px;
+  color: #666;
+}
+
+.acciones {
+  margin-top: 12px;
+  display: flex;
+  gap: 10px;
+}
+
+.acciones button {
+  flex: 1;
+  padding: 8px;
+  border-radius: 6px;
+  border: none;
+  background: #3b5bdb;
+  color: white;
+  cursor: pointer;
+}
+
+.btn-secundario {
+  background: #495057;
+}
+
 /* =========================
    FORM LECTURAS DOCENTE
 ========================= */
@@ -916,6 +965,171 @@ table td {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 14px;
+}
+
+.lector-progreso-card {
+  background: #ffffff;
+  border: 1px solid #dbe2f0;
+  border-radius: 14px;
+  padding: 16px;
+  margin: 18px 0;
+}
+
+.lector-progreso-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.lector-progreso-info strong {
+  color: #123b73;
+  font-size: 16px;
+}
+
+.lector-progreso-info p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #5f6b82;
+}
+
+.lector-progreso-numero {
+  background: #eef2ff;
+  color: #2f5597;
+  font-weight: 800;
+  padding: 8px 14px;
+  border-radius: 999px;
+}
+
+.lector-progreso-track {
+  width: 100%;
+  height: 14px;
+  background: #e8edf7;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.lector-progreso-fill {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, #2f5597, #5b64f5);
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.lector-acciones {
+  margin-top: 18px;
+}
+
+.lector-acciones button {
+  width: 100%;
+  background: #2f5597;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.lector-acciones button:hover {
+  background: #24477f;
+}
+
+.quiz-layout {
+  margin-top: 18px;
+  padding: 8px;
+}
+
+.quiz-card {
+  background: #ffffff;
+  border: 1px solid #dbe2f0;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 22px;
+  box-shadow: 0 4px 12px rgba(15, 47, 95, 0.08);
+}
+
+.quiz-card h3 {
+  color: #0f2f5f;
+  margin-bottom: 14px;
+}
+
+.quiz-card p {
+  line-height: 1.6;
+}
+
+.quiz-pregunta {
+  font-weight: 700;
+  color: #111827;
+}
+
+.quiz-opciones {
+  margin-top: 15px;
+  display: grid;
+  gap: 12px;
+}
+
+.quiz-opcion {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.quiz-opcion input {
+  width: 18px;
+  height: 18px;
+  accent-color: #5b64f5;
+}
+
+.quiz-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 18px;
+}
+
+.quiz-progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 300px;
+}
+
+.quiz-progress-wrap span {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.quiz-progress {
+  flex: 1;
+  height: 10px;
+  background: #e8edf7;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.quiz-progress-fill {
+  height: 100%;
+  background: #5b64f5;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.quiz-btn-next {
+  background: #5b64f5;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.quiz-btn-next:hover {
+  background: #4e56d8;
 }
 
 /* RESPONSIVE */
