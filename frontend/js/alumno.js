@@ -2,7 +2,7 @@ const usuario = JSON.parse(localStorage.getItem("usuario"));
 
 if (!usuario || usuario.rol !== "alumno") {
   alert("Acceso no autorizado");
-  window.location.href = "login.html";
+  window.location.href = "index.html";
 }
 
 const API_RESULTADOS = "https://caza-libros.onrender.com/api/resultados";

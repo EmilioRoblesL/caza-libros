@@ -7,7 +7,7 @@ let graficoRoles = null;
 
 if (!usuario || usuario.rol !== "admin") {
   alert("Acceso no autorizado");
-  window.location.href = "login.html";
+  window.location.href = "index.html";
 }
 
 async function cargarResumenSistema() {

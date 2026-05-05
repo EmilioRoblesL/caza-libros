@@ -90,7 +90,7 @@ registroForm?.addEventListener("submit", async (e) => {
     actualizarCamposDocente();
 
     setTimeout(() => {
-      window.location.href = "login.html";
+      window.location.href = "index.html";
     }, 1500);
   } catch (error) {
     console.error(error);
