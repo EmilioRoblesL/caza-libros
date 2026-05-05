@@ -536,6 +536,32 @@ const verificarSeguridadSistema = async (req, res) => {
   }
 };
 
+const resetearAlumno = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    await pool.query("BEGIN");
+
+    await pool.query("DELETE FROM puntos WHERE alumno_id = $1", [id]);
+    await pool.query("DELETE FROM intentos WHERE alumno_id = $1", [id]);
+    await pool.query("DELETE FROM progreso WHERE alumno_id = $1", [id]);
+
+    await pool.query("COMMIT");
+
+    res.json({
+      message: "Alumno reseteado correctamente"
+    });
+
+  } catch (error) {
+    await pool.query("ROLLBACK");
+    console.error(error);
+    res.status(500).json({
+      message: "Error al resetear alumno"
+    });
+  }
+};
+
+
 module.exports = {
   obtenerUsuarios,
   obtenerResumenSistema,
@@ -548,5 +574,6 @@ module.exports = {
   obtenerReportesSistema,
   exportarAuditoriaCSV,
   respaldarSistema,
-  verificarSeguridadSistema
+  verificarSeguridadSistema,
+  resetearAlumno
 };

@@ -12,7 +12,8 @@ const {
   obtenerReportesSistema,
   exportarAuditoriaCSV,
   respaldarSistema,
-  verificarSeguridadSistema
+  verificarSeguridadSistema,
+  resetearAlumno
 } = require("../controllers/adminController");
 
 router.get("/usuarios", obtenerUsuarios);
@@ -31,6 +32,7 @@ router.get("/seguridad/verificar", verificarSeguridadSistema);
 router.post("/usuarios", crearUsuarioAdmin);
 router.put("/usuarios/:id", actualizarUsuarioAdmin);
 router.delete("/usuarios/:id", eliminarUsuarioAdmin);
+router.delete("/usuarios/:id/reset", resetearAlumno);
 
 
 module.exports = router;

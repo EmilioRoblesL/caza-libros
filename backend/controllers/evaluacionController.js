@@ -12,6 +12,21 @@ const responderEvaluacion = async (req, res) => {
       });
     }
 
+    const intentoPrevio = await client.query(
+      `SELECT id, puntaje, aprobado
+      FROM intentos
+      WHERE alumno_id = $1 AND lectura_id = $2
+      LIMIT 1`,
+      [alumno_id, lectura_id]
+    );
+
+    if (intentoPrevio.rows.length > 0) {
+      return res.status(400).json({
+        message: "Esta evaluación ya fue respondida. Solo se permite un intento.",
+        intento: intentoPrevio.rows[0]
+      });
+    }
+
     await client.query("BEGIN");
 
     const intentoResult = await client.query(
