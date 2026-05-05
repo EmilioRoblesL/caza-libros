@@ -12,7 +12,7 @@ if (!usuario || usuario.rol !== "admin") {
 
 async function cargarResumenSistema() {
   try {
-    const res = await fetch("http://localhost:3000/api/admin/resumen");
+    const res = await fetch("https://caza-libros.onrender.com/api/admin/resumen");
     const data = await res.json();
 
     document.getElementById("cantidadUsuarios").textContent = data.total_usuarios ?? 0;
@@ -25,7 +25,7 @@ async function cargarResumenSistema() {
 
 async function cargarAlertasSistema() {
   try {
-    const res = await fetch("http://localhost:3000/api/admin/alertas");
+    const res = await fetch("https://caza-libros.onrender.com/api/admin/alertas");
     const data = await res.json();
 
     const lista = document.getElementById("listaAlertas");
@@ -51,7 +51,7 @@ async function cargarAlertasSistema() {
 
 async function cargarUsuarios() {
   try {
-    const res = await fetch("http://localhost:3000/api/admin/usuarios");
+    const res = await fetch("https://caza-libros.onrender.com/api/admin/usuarios");
     const data = await res.json();
 
     usuariosGlobal = Array.isArray(data) ? data : [];
@@ -138,7 +138,7 @@ async function cargarCursosAlumnoAdmin() {
   if (!select) return;
 
   try {
-    const res = await fetch("http://localhost:3000/api/docente-lecturas/cursos");
+    const res = await fetch("https://caza-libros.onrender.com/api/docente-lecturas/cursos");
     const cursos = await res.json();
 
     select.innerHTML = `<option value="">Seleccionar curso del alumno</option>`;
@@ -254,13 +254,13 @@ async function guardarUsuario() {
     }
 
     if (id) {
-      response = await fetch(`http://localhost:3000/api/admin/usuarios/${id}`, {
+      response = await fetch(`https://caza-libros.onrender.com/api/admin/usuarios/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(bodyData)
       });
     } else {
-      response = await fetch("http://localhost:3000/api/admin/usuarios", {
+      response = await fetch("https://caza-libros.onrender.com/api/admin/usuarios", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(bodyData)
@@ -298,7 +298,7 @@ async function eliminarUsuario(id) {
   if (!confirmar) return;
 
   try {
-    const response = await fetch(`http://localhost:3000/api/admin/usuarios/${id}`, {
+    const response = await fetch(`https://caza-libros.onrender.com/api/admin/usuarios/${id}`, {
       method: "DELETE"
     });
 
@@ -358,7 +358,7 @@ function filtrarUsuarios() {
 
 async function cargarAuditoria() {
   try {
-    const res = await fetch("http://localhost:3000/api/admin/auditoria");
+    const res = await fetch("https://caza-libros.onrender.com/api/admin/auditoria");
     const data = await res.json();
 
     auditoriaGlobal = Array.isArray(data) ? data : [];
@@ -427,7 +427,7 @@ function filtrarAuditoria() {
 
 async function cargarResumenReportes() {
   try {
-    const res = await fetch("http://localhost:3000/api/admin/reportes");
+    const res = await fetch("https://caza-libros.onrender.com/api/admin/reportes");
     const data = await res.json();
 
     document.getElementById("reporteUsuariosActivos").textContent = data.total_usuarios ?? 0;
@@ -441,7 +441,7 @@ async function cargarResumenReportes() {
 
 async function cargarGraficoActividad() {
   try {
-    const res = await fetch("http://localhost:3000/api/admin/actividad");
+    const res = await fetch("https://caza-libros.onrender.com/api/admin/actividad");
     const data = await res.json();
 
     const labels = data.map((d) => d.fecha || "Sin fecha");
@@ -485,7 +485,7 @@ async function cargarGraficoActividad() {
 
 async function cargarGraficoRoles() {
   try {
-    const res = await fetch("http://localhost:3000/api/admin/usuarios");
+    const res = await fetch("https://caza-libros.onrender.com/api/admin/usuarios");
     const data = await res.json();
 
     const conteo = { alumno: 0, docente: 0, admin: 0 };
@@ -527,7 +527,7 @@ async function cargarGraficoRoles() {
 }
 
 function exportarAuditoria() {
-  window.open("http://localhost:3000/api/admin/auditoria/exportar", "_blank");
+  window.open("https://caza-libros.onrender.com/api/admin/auditoria/exportar", "_blank");
 }
 
 function respaldarSistema() {
@@ -537,7 +537,7 @@ function respaldarSistema() {
     estado.textContent = "Generando respaldo...";
   }
 
-  window.open("http://localhost:3000/api/admin/backup", "_blank");
+  window.open("https://caza-libros.onrender.com/api/admin/backup", "_blank");
 
   setTimeout(() => {
     if (estado) {
@@ -555,7 +555,7 @@ async function verificarSeguridad() {
       estado.textContent = "Verificando...";
     }
 
-    const res = await fetch("http://localhost:3000/api/admin/seguridad/verificar");
+    const res = await fetch("https://caza-libros.onrender.com/api/admin/seguridad/verificar");
     const data = await res.json();
 
     if (!res.ok) {
@@ -639,7 +639,7 @@ async function resetearAlumno(id) {
   if (!confirmar) return;
 
   try {
-    const res = await fetch(`http://localhost:3000/api/admin/usuarios/${id}/reset`, {
+    const res = await fetch(`https://caza-libros.onrender.com/api/admin/usuarios/${id}/reset`, {
       method: "DELETE"
     });
 

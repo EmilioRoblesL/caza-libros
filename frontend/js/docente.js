@@ -5,9 +5,9 @@ if (!usuario || usuario.rol !== "docente") {
   window.location.href = "login.html";
 }
 
-const API_DOCENTE = "http://localhost:3000/api/docente";
-const API_LECTURAS = "http://localhost:3000/api/docente-lecturas";
-const API_CUESTIONARIOS = "http://localhost:3000/api/cuestionarios";
+const API_DOCENTE = "https://caza-libros.onrender.com/api/docente";
+const API_LECTURAS = "https://caza-libros.onrender.com/api/docente-lecturas";
+const API_CUESTIONARIOS = "https://caza-libros.onrender.com/api/cuestionarios";
 
 let alumnosCursoGlobal = [];
 let alumnosPendientesGlobal = [];

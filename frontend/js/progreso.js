@@ -7,7 +7,7 @@ async function guardarProgreso() {
   };
 
   try {
-    const response = await fetch("http://localhost:3000/api/progreso", {
+    const response = await fetch("https://caza-libros.onrender.com/api/progreso", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"

@@ -20,7 +20,7 @@ loginForm?.addEventListener("submit", async (e) => {
   const password = document.getElementById("password").value;
 
   try {
-    const response = await fetch("http://localhost:3000/api/auth/login", {
+    const response = await fetch("https://caza-libros.onrender.com/api/auth/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"

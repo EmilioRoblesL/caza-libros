@@ -5,11 +5,11 @@ if (!usuario || usuario.rol !== "alumno") {
   window.location.href = "login.html";
 }
 
-const API_RESULTADOS = "http://localhost:3000/api/resultados";
-const API_PUNTOS = "http://localhost:3000/api/puntos";
-const API_EVALUACIONES = "http://localhost:3000/api/evaluaciones";
-const API_ASIGNACIONES = "http://localhost:3000/api/asignaciones";
-const API_PROGRESO = "http://localhost:3000/api/progreso";
+const API_RESULTADOS = "https://caza-libros.onrender.com/api/resultados";
+const API_PUNTOS = "https://caza-libros.onrender.com/api/puntos";
+const API_EVALUACIONES = "https://caza-libros.onrender.com/api/evaluaciones";
+const API_ASIGNACIONES = "https://caza-libros.onrender.com/api/asignaciones";
+const API_PROGRESO = "https://caza-libros.onrender.com/api/progreso";
 
 let lecturaSeleccionada = null;
 let timeoutGuardado = null;
@@ -428,7 +428,7 @@ async function cargarProgresoAlumno() {
 ========================= */
 async function cargarResultados() {
   try {
-    const res = await fetch(`http://localhost:3000/api/resultados/${usuario.id}`);
+    const res = await fetch(`https://caza-libros.onrender.com/api/resultados/${usuario.id}`);
     const data = await res.json();
 
     const lista = document.getElementById("listaResultados");
@@ -552,7 +552,7 @@ async function responderEvaluacion() {
 
 async function cargarCuestionariosAlumno() {
   try {
-    const res = await fetch(`http://localhost:3000/api/evaluaciones/alumno/${usuario.id}/cuestionarios`);
+    const res = await fetch(`https://caza-libros.onrender.com/api/evaluaciones/alumno/${usuario.id}/cuestionarios`);
     const cuestionarios = await res.json();
 
     const resResultados = await fetch(`${API_RESULTADOS}/${usuario.id}`);
@@ -608,7 +608,7 @@ abrir cuestionario para responder
 
 async function abrirCuestionario(id) {
   try {
-    const res = await fetch(`http://localhost:3000/api/cuestionarios/${id}`);
+    const res = await fetch(`https://caza-libros.onrender.com/api/cuestionarios/${id}`);
     const data = await res.json();
 
     if (!res.ok) {
@@ -746,7 +746,7 @@ async function finalizarCuestionario() {
 ========================= */
 async function enviarRespuestas(cuestionarioId, lecturaId, respuestas) {
   try {
-    const res = await fetch("http://localhost:3000/api/evaluaciones/responder", {
+    const res = await fetch("https://caza-libros.onrender.com/api/evaluaciones/responder", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -791,7 +791,7 @@ async function enviarRespuestas(cuestionarioId, lecturaId, respuestas) {
 
 async function cargarPerfilAlumno() {
   try {
-    const res = await fetch(`http://localhost:3000/api/alumnos/${usuario.id}/perfil`);
+    const res = await fetch(`https://caza-libros.onrender.com/api/alumnos/${usuario.id}/perfil`);
     const data = await res.json();
 
     const cursoInfo = document.getElementById("cursoAlumnoInfo");

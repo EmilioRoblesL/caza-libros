@@ -7,7 +7,7 @@ recuperarForm?.addEventListener("submit", async (e) => {
   const correo = document.getElementById("correo").value.trim();
 
   try {
-    const response = await fetch("http://localhost:3000/api/auth/forgot-password", {
+    const response = await fetch("https://caza-libros.onrender.com/api/auth/forgot-password", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
